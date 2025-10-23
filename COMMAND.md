@@ -88,7 +88,8 @@ app/
     └── profil.php
 ```
 
-#### Files cache duration and GeoLite2-City.mmdb
+#### Files cache duration and GeoLite2-City.mmdb location
+To use GeoIP features, please download GeoLite2-City.mmdb from MaxMind after creating a free account.
 ```bash
 php spark cirebonweb:publish --writable
 ```
@@ -98,5 +99,5 @@ writable/
 ├── json/
 │   └── crb_cache.json
 └── uploads/
-    └── GeoLite2-City.mmdb
+    └── GeoLite2-City.mmdb # place the GeoLite2-City.mmdb file here
 ```

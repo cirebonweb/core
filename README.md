@@ -34,7 +34,7 @@ A modular, production-ready admin dashboard built on **CodeIgniter 4+** and **Ad
 - 🧪 HTML minification (auto-enabled in production)
 - 📧 Email library with HTML template support and delivery logging
 - 🗂️ Cache helper for duration control and file management
-- 🌍 GeoIP2 integration with location detection (includes GeoLite2-City)
+- 🌍 GeoIP2 integration with location detection (not include GeoLite2-City)
 - 🛡️ Shield authentication with login error tracking
 - ⚙️ CI4 Settings module for dynamic configuration
 
@@ -58,7 +58,7 @@ composer require cirebonweb/core
 ```
 
 2. Publish:
-See [COMMAND.md](COMMAND.md) for more usage details and publish options.
+See [COMMAND](COMMAND.md) for more usage details and publish options.
 
 ## 📄 License
 This project is licensed under the MIT License.
@@ -67,5 +67,4 @@ This project is licensed under the MIT License.
 Documentation within the source code (PHPDoc-style `/** ... */`) is written in Bahasa Indonesia to support local maintainers and interns. If you're interested in contributing—whether by improving documentation, translating, or extending features—feel free to join and collaborate.
 
 ## 📘 About
-
-This package started as a personal tool to simplify CI4 project setup. To learn more about its origin, design choices, and purpose, see [ABOUT.md](ABOUT.md).
+This package started as a personal tool to simplify CI4 project setup. To learn more about its origin, design choices, and purpose, see [ABOUT](ABOUT.md).
