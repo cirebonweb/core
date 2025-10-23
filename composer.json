@@ -1,0 +1,35 @@
+{
+  "name": "cirebonweb/core",
+  "description": "Core package for CodeIgniter 4 with Admin Dashboard",
+  "license": "MIT",
+  "type": "library",
+  "keywords": [
+    "codeigniter",
+    "codeigniter4"
+  ],
+  "authors": [
+    {
+      "name": "Mahmud",
+      "email": "support@cirebonweb.com",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": "^8.1",
+    "geoip2/geoip2": "^3.2"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "autoload": {
+    "psr-4": {
+      "Cirebonweb\\": "src/"
+    }
+  },
+  "extra": {
+    "ci4": {
+      "resources": {
+        "views": "src/Views"
+      }
+    }
+  }
+}
