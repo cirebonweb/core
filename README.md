@@ -1,5 +1,11 @@
 ## Cirebonweb CI4+ All-in-One Admin Dashboard
 
+![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+[![About](https://img.shields.io/badge/About-Project%20Story-blue)](ABOUT.md)
+[![Contributing](https://img.shields.io/badge/Contributing-Guide-orange)](CONTRIBUTING.md)
+[![Changelog](https://img.shields.io/badge/Changelog-Version%20History-yellow)](CHANGELOG.md)
+[![Commands](https://img.shields.io/badge/Commands-Publish%20Options-purple)](COMMAND.md)
+
 Cirebonweb CI4+ is a fully integrated admin dashboard built on the latest version of CodeIgniter 4. It is ready to use out of the box — simply install via Composer, publish the resources, and all core features are instantly available, including login tracking, email logging, cache control, and system configuration.
 
 No manual setup required. No need to install modules one by one. Every page, helper, and configuration is pre-integrated and immediately operational, streamlining development and deployment for maintainers and teams.
