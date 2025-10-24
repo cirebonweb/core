@@ -3,10 +3,7 @@
   "description": "Core package for CodeIgniter 4 with Admin Dashboard",
   "license": "MIT",
   "type": "library",
-  "keywords": [
-    "codeigniter",
-    "codeigniter4"
-  ],
+  "keywords": ["codeigniter", "codeigniter4"],
   "authors": [
     {
       "name": "Mahmud",
@@ -17,7 +14,7 @@
   "require": {
     "php": "^8.1"
   },
-    "minimum-stability": "stable",
+  "minimum-stability": "stable",
   "prefer-stable": true,
   "autoload": {
     "psr-4": {
