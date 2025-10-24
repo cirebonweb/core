@@ -31,6 +31,4 @@ Events::on('DBQuery', static function (Query $query) {
         $rememberId = AuthRememberLastIdLibrari::getId();
         (new AuthSesiLibrari())->insertAuthSesi($rememberId);
     }
-
-    if (auth()->loggedIn()) {return;}
 });

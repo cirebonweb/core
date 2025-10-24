@@ -52,46 +52,79 @@ A modular, production-ready admin dashboard built on **CodeIgniter 4+** and **Ad
 - 🎨 AdminLTE 3.2 dashboard template
 - 🐘 PHP 8.1+ compatible
 
-## 🛠️ Requirements & Installation
+## 🚀 Getting Started Installation
 
 This package requires the following core dependencies:
 
-```markdown
-* codeigniter4/framework
-* codeigniter4/settings
-* codeigniter4/shield
+1. codeigniter4/framework
+```bash
+composer create-project codeigniter4/appstarter project-root
 ```
 
-### ⚠️ Manual Installation Requirement
+2. codeigniter4/shield and codeigniter4/settings
+```bash
+composer require codeigniter4/shield
+php spark shield:setup
+```
 
-Due to license restrictions and to prevent accidental uninstallation, the `geoip2/geoip2` package is **not** included in this package's `composer.json`.
-Requirement: This package requires `geoip2/geoip2` version **`^3.2` or later** to function correctly.
-You MUST install it separately before running any GeoIP-related features:
-
+3. geoip2/geoip2
 ```bash
 composer require geoip2/geoip2
 ```
 
-To enable location detection, you must manually download and configure the GeoLite2 database:
+4. cirebonweb/core
+```bash
+composer require cirebonweb/core
+```
 
+5. publish project-root
+* please read [publish options](COMMAND.md) before you execute this command
+```bash
+php spark cirebonweb:publish --all
+```
+
+6. configure .env
+```bash
+# CI_ENVIRONMENT = production
+CI_ENVIRONMENT = development
+
+app.baseURL = 'http://localhost:8080/'
+
+database.default.hostname = localhost
+database.default.database = project_root
+database.default.username = root
+database.default.password = 
+database.default.DBDriver = MySQLi
+# database.default.DBPrefix =
+database.default.port = 3306
+
+encryption.key = 'aBigSecretKeyOfAtLeast32Characters!'
+```
+
+7. database migration
+* don't forget to configure env before executing this command
+```bash
+php spark migrate --all
+```
+
+8. run seeder
+```bash
+php spark db:seed SettingsSeeder
+php spark db:seed UserSeeder
+```
+
+9. run project
+```bash
+php spark serve
+```
+
+### ⚠️ geoip2 feature requirements
+To enable location detection, you must manually download and configure the GeoLite2 database:
 - Download: Create a free account at MaxMind and download the `GeoLite2-City.mmdb` file.
 - Placement: Place the downloaded file in a secure, non-public directory within your CodeIgniter project (e.g., writable/uploads/).
 - Configuration: Adjust your CodeIgniter configuration file to point to the correct database path.
 
 Note: The command above installs the latest compatible stable version. If you require a specific version, ensure your project's composer.json file explicitly requires geoip2/geoip2:^3.2. Failure to complete both steps will result in fatal errors when using GeoIP features.
-
-## 🚀 Getting Started
-
-1. Installation with composer.
-```bash
-composer require cirebonweb/core
-```
-
-2. publish root project:
-```bash
-php spark cirebonweb:publish --all
-```
-See [COMMAND](COMMAND.md) for detailed information on changes to your root project.
 
 ## 📄 License
 This project is licensed under the MIT License.

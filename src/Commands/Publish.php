@@ -11,65 +11,62 @@ class Publish extends BaseCommand
     protected $name        = 'cirebonweb:publish';
     protected $description = 'Publish resources (views, public, config, database) from Cirebonweb package.';
 
-    protected $usage   = 'php spark cirebonweb:publish [--all|--config|--database|--view|--language|--public|--writable]';
+    protected $usage   = 'php spark cirebonweb:publish [--all|--config|--controllers|--database|--view|--public|--writable]';
     protected $options = [
-        '--all'      => 'Publish all resources',
-        '--config'   => 'Publish app config files',
-        '--database' => 'Publish app migrations/seeds',
-        '--view'     => 'Publish app views files',
-        '--language' => 'Publish language files',
-        '--public'   => 'Publish public assets',
-        '--writable' => 'Publish root writable',
+        '--all'         => 'Publish all resources',
+        '--config'      => 'Publish app config files',
+        '--controllers' => 'Publish app controllers files',
+        '--database'    => 'Publish app migrations/seeds',
+        '--view'        => 'Publish app views files',
+        '--public'      => 'Publish public assets',
+        '--writable'    => 'Publish root writable',
     ];
 
     public function run(array $params)
     {
-        // Baca opsi dengan CLI::getOption()
         $option = null;
         if (CLI::getOption('all')) {
             $option = 'all';
         } elseif (CLI::getOption('config')) {
             $option = 'config';
+        } elseif (CLI::getOption('controllers')) {
+            $option = 'controllers';
         } elseif (CLI::getOption('database')) {
             $option = 'database';
         } elseif (CLI::getOption('view')) {
             $option = 'view';
-        } elseif (CLI::getOption('language')) {
-            $option = 'language';
         } elseif (CLI::getOption('public')) {
             $option = 'public';
         } elseif (CLI::getOption('writable')) {
             $option = 'writable';
         }
 
-        // Jika tidak ada opsi yang cocok
         if ($option === null) {
             CLI::error('Invalid or missing option.');
             CLI::write('Usage: php spark cirebonweb:publish [--all|--view|--language|--public|--database|--appconfig]');
             return;
         }
 
-        // Jalankan publish sesuai opsi
         switch ($option) {
             case 'all':
                 $this->publishConfig();
+                $this->publishControllers();
                 $this->publishDatabase();
                 $this->publishView();
-                $this->publishLanguage();
                 $this->publishPublic();
                 $this->publishWritable();
                 break;
             case 'config':
                 $this->publishConfig();
                 break;
+            case 'controllers':
+                $this->publishControllers();
+                break;
             case 'database':
                 $this->publishDatabase();
                 break;
             case 'view':
                 $this->publishView();
-                break;
-            case 'language':
-                $this->publishLanguage();
                 break;
             case 'public':
                 $this->publishPublic();
@@ -87,6 +84,13 @@ class Publish extends BaseCommand
         $this->copyDirectory($from, $to, 'App config');
     }
 
+    private function publishControllers(): void
+    {
+        $from = realpath(__DIR__ . '/../../src/Publish/Controllers');
+        $to   = APPPATH . 'Controllers';
+        $this->copyDirectory($from, $to, 'App Controllers');
+    }
+
     private function publishDatabase(): void
     {
         $from = realpath(__DIR__ . '/../../src/Publish/Database');
@@ -99,13 +103,6 @@ class Publish extends BaseCommand
         $from = realpath(__DIR__ . '/../../src/Publish/Views');
         $to   = APPPATH . 'Views';
         $this->copyDirectory($from, $to, 'App Views');
-    }
-
-    private function publishLanguage(): void
-    {
-        $from = realpath(__DIR__ . '/../../src/Publish/Language');
-        $to   = APPPATH . 'Language';
-        $this->copyDirectory($from, $to, 'Language files');
     }
 
     private function publishPublic(): void

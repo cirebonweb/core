@@ -75,9 +75,9 @@ class AuthGroups extends ShieldAuthGroups
         'admin.access'        => 'Can access the sites admin area',
         'admin.settings'      => 'Can access the main site settings',
         'klien.manage-admins' => 'Can manage other admins',
-        'klien.create'        => 'Dapat membuat data klien',
-        'klien.edit'          => 'Dapat merubah data klien',
-        'klien.delete'        => 'Dapat menghapus data klien',
+        'klien.create'        => 'Can create new non-admin users',
+        'klien.edit'          => 'Can edit existing non-admin users',
+        'klien.delete'        => 'Can delete existing non-admin users',
         'beta.access'         => 'Can access beta-level features',
     ];
 
