@@ -6,15 +6,11 @@ Each command installs specific components—such as configuration files, databas
 
 Refer to the sections below for details on each publish option, including the resulting file structure and purpose.
 
-#### Command for all publish
-```
-php spark cirebonweb:publish --all
-```
-
 #### Default configuration for starter kit
 ```
 php spark cirebonweb:publish --config
 ```
+
 ```ruby
 app/
 └── Config/
@@ -30,6 +26,7 @@ app/
 ```
  php spark cirebonweb:publish --database
 ```
+
 ```ruby
 app/
 └── Database/
@@ -44,9 +41,11 @@ app/
 ```
 
 #### Custom language
+
 ```
 php spark cirebonweb:publish --language
 ```
+
 ```ruby
 app/
 └── Language/
@@ -55,9 +54,11 @@ app/
 ```
 
 #### Asset files required for frontend
+
 ```bash
 php spark cirebonweb:publish --public
 ```
+
 ```ruby
 public/
 ├── dist/      # AdminLTE
@@ -67,9 +68,11 @@ public/
 ```
 
 #### Customizable view templates
+
 ```bash
 php spark cirebonweb:publish --view
 ```
+
 ```ruby
 app/
 └── Views/
@@ -89,7 +92,7 @@ app/
 ```
 
 #### Files cache duration and GeoLite2-City.mmdb location
-To use GeoIP features, please download GeoLite2-City.mmdb from MaxMind after creating a free account.
+
 ```bash
 php spark cirebonweb:publish --writable
 ```

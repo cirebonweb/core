@@ -17,8 +17,6 @@
   "require": {
     "php": "^8.1"
   },
-  "minimum-stability": "dev",
-  "prefer-stable": true,
   "autoload": {
     "psr-4": {
       "Cirebonweb\\": "src/"
@@ -30,5 +28,7 @@
         "views": "src/Views"
       }
     }
-  }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
 }
