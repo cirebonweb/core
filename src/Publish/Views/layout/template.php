@@ -21,10 +21,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="<?= base_url('plugin/fontawesome/css/all.min.css') ?>" />
   <link rel="stylesheet" href="<?= base_url('dist/css/adminlte.min.css') ?>" />
   <link rel="stylesheet" href="<?= base_url('plugin/sweetalert/sweetalert2.min.css') ?>" />
+  <link rel="stylesheet" href="<?= base_url('vendor/css/custom_adminlte.min.css') ?>" />
   <?= $this->renderSection('css') ?>
-  <link rel="stylesheet" href="<?= base_url('dist/css/custom.min.css') ?>" />
 </head>
 
 <body class="hold-transition sidebar-mini">
@@ -68,8 +69,60 @@
       </svg>
     </div>
 
-    <?= $this->include('layout\navbar'); ?>
-    <?= $this->include('layout\sidebar'); ?>
+    <?php $auth_group = (auth()->user()->inGroup('klien')) ? 'klien' : 'admin'; ?>
+
+    <!-- .navbar -->
+    <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+      <ul class="navbar-nav">
+        <li class="nav-item"><a class="nav-link list" data-widget="pushmenu" href="#" role="button"><i class="bi bi-arrows-collapse-vertical"></i></a></li>
+        <li class="nav-item d-none d-sm-inline-block"><a href="<?= url_to($auth_group) ?>" class="nav-link">Home</a></li>
+        <?= $this->include('layout/navbar_' . $auth_group); ?>
+      </ul>
+
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item dropdown">
+          <a class="nav-link" data-toggle="dropdown" href="javascript:void(0)">Hai, <?= auth()->user()->username ?> <i class="bi bi-caret-down ml-1"></i></a>
+          <div class="dropdown-menu dropdown-menu-sm dropdown-menu-right">
+            <a href="<?= url_to('profil') ?>" class="dropdown-item"><i class="bi bi-person mr-3"></i> Profil</a>
+            <div class="dropdown-divider"></div>
+            <a href="<?= url_to('logout') ?>" class="dropdown-item"><i class="bi bi-box-arrow-right mr-3"></i>Logout</a>
+          </div>
+        </li>
+      </ul>
+    </nav>
+    <!-- /.navbar -->
+
+    <!-- .sidebar -->
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+      <a href="<?= url_to($auth_group) ?>" class="brand-link"><img src="<?= base_url('upload/logo/') . setting('App.logoPutih') ?>" height="58"></a>
+
+      <div class="sidebar">
+        <nav class="mt-2">
+          <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+
+            <!-- Dashboard -->
+            <li class="nav-item">
+              <a href="<?= url_to($auth_group) ?>" class="nav-link<?= (current_url() == base_url($auth_group)) ? ' active' : '' ?>">
+                <i class="nav-icon bi bi-speedometer"></i>
+                <p>Dashboard</p>
+              </a>
+            </li>
+
+            <!-- Profil -->
+            <li class="nav-item">
+              <a href="<?= url_to('profil') ?>" class="nav-link<?= (current_url() == base_url('profil')) ? ' active' : '' ?>">
+                <i class="nav-icon bi bi-person-vcard"></i>
+                <p>Profil</p>
+              </a>
+            </li>
+
+            <?= $this->include('layout/sidebar_' . $auth_group); ?>
+
+          </ul>
+        </nav>
+      </div>
+    </aside>
+    <!-- /.sidebar -->
 
     <div class="content-wrapper">
       <!-- awal judul halaman -->
@@ -81,9 +134,9 @@
             </div>
             <div class="col-sm-6">
               <ol class="breadcrumb float-sm-right">
-                <?php $home_link = (auth()->user()->inGroup('klien')) ? 'klien' : 'admin'; ?>
-                <li class="breadcrumb-item"><a href="<?= base_url($home_link) ?>">Home</a></li>
-                <li class="breadcrumb-item active"><?= $navigasi . '→ &nbsp;' . ($navTitle ?? $pageTitle) ?></li>
+
+                <li class="breadcrumb-item"><a href="<?= route_to($auth_group) ?>">Home</a></li>
+                <li class="breadcrumb-item active"><?= ($navigasi ? $navigasi . '→ &nbsp;' : '') ?><?= ($navTitle ?? $pageTitle) ?></li>
               </ol>
             </div>
           </div>
@@ -111,26 +164,77 @@
   <script src="<?= base_url('plugin/bootstrap/bootstrap.bundle.min.js') ?>"></script>
   <script src="<?= base_url('dist/js/adminlte.min.js') ?>"></script>
   <script src="<?= base_url('plugin/sweetalert/sweetalert2.min.js') ?>" defer></script>
-  <script>const Beranda={refreshCsrf:function(){console.log("CSRF token refreshed (placeholder).");const e=document.querySelector('meta[name="csrf-token"]');e&&$.ajaxSetup({headers:{"X-CSRF-TOKEN":e.getAttribute("content")}})}};</script>
+  <script>
+    const Beranda = {
+      refreshCsrf: function() {
+        console.log("CSRF token refreshed (placeholder).");
+        const e = document.querySelector('meta[name="csrf-token"]');
+        e && $.ajaxSetup({
+          headers: {
+            "X-CSRF-TOKEN": e.getAttribute("content")
+          }
+        })
+      },
+      showPreloader: function() {
+        const $pre = $('.preloader');
+        $pre.css({
+          'height': '100%',
+          'display': 'flex',
+          'background-color': 'rgba(0, 0, 0, 0.4)'
+        });
+        $pre.children().show();
+      },
+      hidePreloader: function() {
+        const $pre = $('.preloader');
+        $pre.css('height', 0);
+        setTimeout(() => {
+          $pre.children().hide();
+        }, 500);
+      }
+    };
+  </script>
   <?= $this->renderSection('js') ?>
   <script>
-    $(document).ready(function() {
     <?php if (session()->getFlashdata('sukses')): ?>
-    Swal.fire({title:'Sukses',html:'<?= session()->getFlashdata('sukses') ?>',icon:'success'});
+      $(function() {
+        Swal.fire({
+          title: 'Sukses',
+          html: '<?= session()->getFlashdata('sukses') ?>',
+          icon: 'success'
+        })
+      });
     <?php elseif (session()->getFlashdata('error')): ?>
-    Swal.fire({title:'Error',html:'<?= session()->getFlashdata('error') ?>',icon:'error'});
+      $(function() {
+        Swal.fire({
+          title: 'Error',
+          html: '<?= session()->getFlashdata('error') ?>',
+          icon: 'error'
+        })
+      });
     <?php elseif (session()->getFlashdata('errors')): ?>
-    <?php $errors = session()->getFlashdata('errors');if(!is_array($errors)){$errors = [$errors];}?>
-    let errors = '<?= implode('<br>', $errors) ?>';
-    Swal.fire({title:'Error Validasi',html: errors,icon:'error'});
+      <?php $errors = session()->getFlashdata('errors');
+      if (!is_array($errors)) {
+        $errors = [$errors];
+      } ?>
+      $(function() {
+        let errors = '<?= implode('<br>', $errors) ?>';
+        Swal.fire({
+          title: 'Error',
+          html: errors,
+          icon: 'error'
+        })
+      });
     <?php endif; ?>
-    });
-    window.addEventListener("load",(function(){const renderTime=performance.now();document.getElementById("microtime").textContent=(renderTime/1e3).toFixed(2)}));;
+    window.addEventListener('load', (function() {
+      const renderTime = performance.now();
+      document.getElementById('microtime').textContent = (renderTime / 1e3).toFixed(2)
+    }));
   </script>
 
 </body>
 
 </html>
+
 <!-- Penggunaan memori: <?= number_format(memory_get_usage() / 1048576, 2) ?> mb -->
 <!-- Waktu render halaman: {elapsed_time} detik -->
 <!-- Waktu render framework: <?= number_format(microtime(true) - $_SERVER['REQUEST_TIME_FLOAT'], 4) ?> detik -->

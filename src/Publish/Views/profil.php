@@ -31,7 +31,7 @@
                                 <ul class="list-group list-group-unbordered mb-3">
                                     <li class="list-group-item"><b>Tanggal Daftar</b> <a class="float-right"><?= date("d M Y → H:i:s", strtotime($user->created_at)) ?></a></li>
                                     <li class="list-group-item"><b>Terakhir Login</b> <a class="float-right"><?= date("d M Y → H:i:s", strtotime($user->last_used_at)) ?></a></li>
-                                    <li class="list-group-item text-center"><b>Upload foto profil</b> <span class="ml-2" data-toggle="tooltip" data-placement="top" title="Dimensi foto ideal 215 x 215 px. Format foto: .jpg .jpeg .png" style="font-size: 15px;"><i class="bi bi-question-circle"></i></span></li>
+                                    <li class="list-group-item text-center"><b>Upload foto profil</b> <span class="ml-2" data-toggle="tooltip" data-placement="top" title="Dimensi foto ideal 215 x 215 px. Format foto: jpg, jpeg, png" style="font-size: 15px;"><i class="bi bi-question-circle"></i></span></li>
                                 </ul>
 
                                 <input type="file" class="form-control-file mt-2" id="foto_profil" name="foto_profil" accept=".jpg,.jpeg,.png">
@@ -80,7 +80,7 @@
 
                             <!-- akun -->
                             <div class="<?= $tabPane ?>" id="akun">
-                                <form id="akun-form" data-cek="true">
+                                <form id="akunForm" data-cek="true">
                                     <input type="hidden" id="id_user" name="id_user" value="<?= $userId ?>">
                                     <div class="row">
 
@@ -131,11 +131,7 @@
                                         </div>
 
                                         <div class="col-12">
-                                            <button type="submit" id="akun-submit" class="btn btn-dark mr-1 float-right">Simpan</button>
-                                            <button type="button" id="akun-loading" class="btn btn-dark float-right" disabled>
-                                                <span class="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span>
-                                                Loading...
-                                            </button>
+                                            <button type="submit" id="akunSubmit" class="btn btn-dark mr-1 float-right">Simpan</button>
                                         </div>
 
                                     </div>
@@ -144,7 +140,7 @@
 
                             <!-- info -->
                             <div class="tab-pane fade" id="info">
-                                <form id="info-form" data-cek="true">
+                                <form id="infoForm" data-cek="true">
                                     <input type="hidden" id="user_id" name="user_id" value="<?= $userId ?>">
                                     <input type="hidden" id="profil_id" name="profil_id" value="<?= $user->id_profil ?>">
 
@@ -190,11 +186,7 @@
                                         </div>
 
                                         <div class="col-12">
-                                            <button type="submit" id="info-submit" class="btn btn-dark mr-1 float-right">Simpan</button>
-                                            <button type="button" id="info-loading" class="btn btn-dark float-right" disabled>
-                                                <span class="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span>
-                                                Loading...
-                                            </button>
+                                            <button type="submit" id="infoSubmit" class="btn btn-dark mr-1 float-right">Simpan</button>
                                         </div>
                                     </div>
                                 </form>
@@ -213,10 +205,6 @@
 <?= $this->section("js") ?>
 
 <script>
-    const $urlLogoutPerangkat = "<?= base_url($url . '/logout-perangkat') ?>";
-    const $urlAkun = "<?= base_url($url . '/update-akun') ?>";
-    const $urlInfo = "<?= base_url($url . '/update-info') ?>";
-
     let isPemilikProfil;
     <?php if (auth()->id() === $userId): ?>
         const $urlGetPerangkat = "<?= base_url($url . '/get-perangkat') ?>";
@@ -227,8 +215,8 @@
 </script>
 
 <?= $this->include('plugin/validasi_js') ?>
-<script src="<?= base_url('page/helper_form.min.js') ?>" defer></script>
-<script src="<?= base_url('page/profil.min.js') ?>" defer></script>
+<script src="<?= base_url('vendor/js/helper_form.min.js') ?>" defer></script>
+<script src="<?= base_url('vendor/js/page_profil.min.js') ?>" defer></script>
 <script src="<?= base_url('plugin/pica/pica.min.js') ?>" defer></script>
-<script src="<?= base_url('page/upload_gambar.min.js') ?>" defer></script>
+<script src="<?= base_url('vendor/js/helper_upload_single.min.js') ?>" defer></script>
 <?= $this->endSection() ?>
