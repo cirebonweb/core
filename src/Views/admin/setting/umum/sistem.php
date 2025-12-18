@@ -1,4 +1,4 @@
-<form id="sistem-form" class="row" data-cek="true">
+<form id="sistemForm" class="row" data-cek="true">
     <div class="col-md-4 mb-4">
         <label for="authRegistration" class="">Form Registrasi</label>
         <div class="input-group">
@@ -49,10 +49,6 @@
     </div>
 
     <div class="col-12">
-        <button type="button" id="sistem-loading" class="btn btn-dark float-right" disabled>
-            <span class="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span>
-            Loading...
-        </button>
-        <button id="sistem-submit" class="btn btn-secondary float-right" type="submit">Simpan</button>
+        <button id="sistemSubmit" class="btn btn-dark float-right" type="submit">Simpan</button>
     </div>
 </form>

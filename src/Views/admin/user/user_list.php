@@ -1,6 +1,6 @@
-<?= $this->extend('layout/template.php') ?>
+<?= $this->extend('layout/template') ?>
 
-<?= $this->section("css") ?>
+<?= $this->section('css') ?>
 <?= $this->include('plugin/tabel_css') ?>
 <?= $this->endSection() ?>
 
@@ -8,7 +8,7 @@
 <section class="content">
     <div class="container-fluid">
 
-        <div class="stat-container row">
+        <div class="statContainer row">
             <div class="col-12 col-md-4 col-lg col-5">
                 <div class="small-box bg-dark">
                     <div class="overlay dark">
@@ -79,7 +79,18 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <table id="tabel-data" class="table table-bordered table-hover dataTable dtr-inline">
+                        <select id="filter_active" class="form-control form-control-sm d-inline-block w-auto mx-1">
+                            <option value=""># Status</option>
+                            <option value="1">Aktif</option>
+                            <option value="0">Non Aktif</option>
+                        </select>
+                        <select id="filter_group" class="form-control form-control-sm d-inline-block w-auto mx-1">
+                            <option value=""># Hak Akses</option>
+                            <?php foreach ($listGroup as $groupName): ?>
+                                <option value="<?= esc($groupName) ?>"><?= ucfirst($groupName) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <table id="tabelData" class="table table-bordered table-hover dataTable dtr-inline">
                             <thead>
                                 <tr>
                                     <th>ID</th>
@@ -110,7 +121,7 @@
                 <h5 class="modal-title"></h5>
             </div>
 
-            <form id="form-data" class="pl-3 pr-3" data-cek="true">
+            <form id="formData" class="pl-3 pr-3" data-cek="true">
                 <div class="modal-body">
                     <input type="hidden" id="iduser" name="iduser">
 
@@ -184,12 +195,12 @@
                     </div>
 
                     <div class="modal-footer">
-                        <button type="submit" id="btn-submit" class="btn btn-primary mr-1 float-right">Simpan</button>
-                        <button type="button" id="btn-loading" class="btn btn-primary" disabled>
+                        <button type="submit" id="btnSubmit" class="btn btn-primary mr-1 float-right">Simpan</button>
+                        <!-- <button type="button" id="btn-loading" class="btn btn-primary" disabled>
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                             Loading...
-                        </button>
-                        <button type="button" id="btn-close" class="btn btn-danger float-right" data-dismiss="modal">Batal</button>
+                        </button> -->
+                        <button type="button" id="btnClose" class="btn btn-danger float-right" data-dismiss="modal">Batal</button>
                     </div>
                 </div>
             </form>
@@ -198,10 +209,11 @@
 </div>
 <?= $this->endSection() ?>
 
-<?= $this->section("js") ?>
+<?= $this->section('js') ?>
 <?= $this->include('plugin/validasi_js') ?>
-<?= $this->include('plugin/tabel_js') ?>
-<script src="<?= base_url('page/helper_statistik.min.js') ?>" defer></script>
-<script src="<?= base_url('page/helper_fetch.min.js') ?>" defer></script>
-<script src="<?= base_url('page/user_list.min.js') ?>" defer></script>
+<script src="<?= base_url('plugin/datatables/datatables.min.js') ?>" defer></script>
+<script src="<?= base_url('vendor/js/helper_statistik.min.js') ?>" defer></script>
+<script src="<?= base_url('vendor/js/helper_form.min.js') ?>" defer></script>
+<script src="<?= base_url('vendor/js/helper_format.min.js') ?>" defer></script>
+<script src="<?= base_url('vendor/js/page_user_list.min.js') ?>" defer></script>
 <?= $this->endSection() ?>

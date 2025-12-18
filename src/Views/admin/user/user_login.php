@@ -8,7 +8,7 @@
 <section class="content">
     <div class="container-fluid">
 
-        <div class="stat-container row">
+        <div class="statContainer row">
             <div class="col-6 col-md-4 col-lg-2">
                 <div class="small-box bg-dark">
                     <div class="overlay dark">
@@ -144,14 +144,26 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <table id="tabel-data" class="table table-bordered table-hover dataTable dtr-inline">
+                        <select id="filter_status" class="form-control form-control-sm d-inline-block w-auto mx-1">
+                            <option value=""># Status</option>
+                            <option value="1">Berhasil</option>
+                            <option value="0">Gagal</option>
+                        </select>
+                        <select id="filter_perangkat" class="form-control form-control-sm d-inline-block w-auto mx-1">
+                            <option value=""># Perangkat</option>
+                            <option value="Desktop">Desktop</option>
+                            <option value="Tablet">Tablet</option>
+                            <option value="Mobile">Mobile</option>
+                            <option value="Robot">Robot</option>
+                        </select>
+                        <table id="tabelData" class="table table-bordered table-hover dataTable dtr-inline">
                             <thead>
                                 <tr>
                                     <th>ID</th>
                                     <th><input type="checkbox" id="checkAll"></th>
                                     <th>Status</th>
                                     <th class="desktop tablet-l">Waktu Login</th>
-                                    <th class="desktop tablet-l">Tipe</th>
+                                    <th class="desktop tablet-l">Tipe Login</th>
                                     <th class="desktop tablet-l">Nama User</th>
                                     <th class="desktop">Email User</th>
                                     <th class="desktop">IP Address</th>
@@ -178,8 +190,7 @@
 </section>
 <?= $this->endSection() ?>
 
-<?= $this->section("js") ?>
-<?= $this->include('plugin/tabel_js') ?>
+<?= $this->section('js') ?>
 <script>
     const langText = {
         removeTitle: '<?= lang('App.remove-title') ?>',
@@ -187,7 +198,9 @@
         removeText: '<?= lang('App.remove-text') ?>'
     };
 </script>
-<script src="<?= base_url('page/helper_statistik.min.js') ?>" defer></script>
-<script src="<?= base_url('page/helper_fetch.min.js') ?>" defer></script>
-<script src="<?= base_url('page/user_login.min.js') ?>" defer></script>
+<script src="<?= base_url('plugin/datatables/datatables.min.js') ?>" defer></script>
+<script src="<?= base_url('vendor/js/helper_statistik.min.js') ?>" defer></script>
+<script src="<?= base_url('vendor/js/helper_form.min.js') ?>" defer></script>
+<script src="<?= base_url('vendor/js/helper_format.min.js') ?>" defer></script>
+<script src="<?= base_url('vendor/js/page_user_login.min.js') ?>" defer></script>
 <?= $this->endSection() ?>

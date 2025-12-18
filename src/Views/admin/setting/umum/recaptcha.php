@@ -1,4 +1,4 @@
-<form id="recaptcha-form" class="row" data-cek="true">
+<form id="recaptchaForm" class="row" data-cek="true">
     <div class="col-md-4 mb-4">
         <label for="gRecaptcha">Google Recaptcha</label>
         <div class="input-group">
@@ -33,10 +33,6 @@
     </div>
 
     <div class="col-12">
-        <button type="button" id="recaptcha-loading" class="btn btn-dark float-right" disabled>
-            <span class="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span>
-            Loading...
-        </button>
-        <button id="recaptcha-submit" class="btn btn-secondary float-right" type="submit">Simpan</button>
+        <button id="recaptchaSubmit" class="btn btn-dark float-right" type="submit">Simpan</button>
     </div>
 </form>

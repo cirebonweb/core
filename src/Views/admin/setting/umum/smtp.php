@@ -1,4 +1,4 @@
-<form id="smtp-form" class="row" data-cek="true">
+<form id="smtpForm" class="row" data-cek="true">
     <?= csrf_field() ?>
     <div class="col-md-6 mb-4">
         <label for="smtpEmail" class="mb-2">Email Pengirim</label>
@@ -84,11 +84,7 @@
     </div>
 
     <div class="col-12">
-        <button type="button" id="smtp-loading" class="btn btn-dark float-right" disabled>
-            <span class="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span>
-            Loading...
-        </button>
-        <button type="submit" id="smtp-submit" class="btn btn-secondary float-right">Simpan</button>
+        <button type="submit" id="smtpSubmit" class="btn btn-dark float-right">Simpan</button>
     </div>
 </form>
 

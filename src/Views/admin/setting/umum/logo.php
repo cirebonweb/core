@@ -12,7 +12,7 @@
                 <input type="file" class="form-control-file mt-2" id="logo_warna" name="logo_warna" accept=".jpg,.jpeg,.png">
                 <div class="info-kecil mt-2" id="info_logo_warna"><small>maksimal ukuran gambar 1 MB</small></div>
 
-                <div class="text-right mt-2"><button type="submit" class="btn btn-sm btn-secondary">Simpan</button></div>
+                <div class="text-right mt-2"><button type="submit" class="btn btn-sm btn-dark">Simpan</button></div>
             </div>
         </form>
     </div>
@@ -30,7 +30,7 @@
                 <input type="file" class="form-control-file mt-2" id="logo_putih" name="logo_putih" accept=".jpg,.jpeg,.png">
                 <div class="info-kecil mt-2" id="info_logo_putih"><small>maksimal ukuran gambar 1 MB</small></div>
 
-                <div class="text-right mt-2"><button type="submit" class="btn btn-sm btn-secondary">Simpan</button></div>
+                <div class="text-right mt-2"><button type="submit" class="btn btn-sm btn-dark">Simpan</button></div>
             </div>
         </form>
     </div>
@@ -50,7 +50,7 @@
                 </div>
 
                 <div class="info-kecil mt-2" id="info_logo_ikon"><small>maksimal ukuran gambar 100 kb</small></div>
-                <div class="text-right mt-2"><button type="submit" class="btn btn-sm btn-secondary">Simpan</button></div>
+                <div class="text-right mt-2"><button type="submit" class="btn btn-sm btn-dark">Simpan</button></div>
             </div>
         </form>
     </div>
@@ -70,7 +70,7 @@
                 </div>
 
                 <div class="info-kecil mt-2" id="info_logo_ikon32"><small>maksimal ukuran gambar 100 kb</small></div>
-                <div class="text-right mt-2"><button type="submit" class="btn btn-sm btn-secondary">Simpan</button></div>
+                <div class="text-right mt-2"><button type="submit" class="btn btn-sm btn-dark">Simpan</button></div>
             </div>
         </form>
     </div>
@@ -90,7 +90,7 @@
                 </div>
 
                 <div class="info-kecil mt-2" id="info_logo_ikon180"><small>maksimal ukuran gambar 100 kb</small></div>
-                <div class="text-right mt-2"><button type="submit" class="btn btn-sm btn-secondary">Simpan</button></div>
+                <div class="text-right mt-2"><button type="submit" class="btn btn-sm btn-dark">Simpan</button></div>
             </div>
         </form>
     </div>
@@ -110,7 +110,7 @@
                 </div>
 
                 <div class="info-kecil mt-2" id="info_logo_ikon192"><small>maksimal ukuran gambar 100 kb</small></div>
-                <div class="text-right mt-2"><button type="submit" class="btn btn-sm btn-secondary">Simpan</button></div>
+                <div class="text-right mt-2"><button type="submit" class="btn btn-sm btn-dark">Simpan</button></div>
             </div>
         </form>
     </div>

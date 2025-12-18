@@ -64,8 +64,8 @@
 
 <?= $this->section("js") ?>
 <?= $this->include('plugin/validasi_js') ?>
-<script src="<?= base_url('page/helper_form.min.js') ?>" defer></script>
-<script src="<?= base_url('page/setting_umum.min.js') ?>" defer></script>
+<script src="<?= base_url('vendor/js/helper_form.min.js') ?>" defer></script>
+<script src="<?= base_url('vendor/js/page_setting_umum.min.js') ?>" defer></script>
 <script src="<?= base_url('plugin/pica/pica.min.js') ?>" defer></script>
-<script src="<?= base_url('page/upload_gambar_multi.min.js') ?>" defer></script>
+<script src="<?= base_url('vendor/js/helper_upload_multi.min.js') ?>" defer></script>
 <?= $this->endSection() ?>

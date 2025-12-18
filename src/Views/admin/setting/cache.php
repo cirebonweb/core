@@ -16,7 +16,7 @@
                     </div>
                     <div class="card-body">
 
-                        <form id="cache-form" data-cek="true">
+                        <form id="cacheForm" data-cek="true">
                             <!-- Cache Geo IP -->
                             <div class="form-group row">
                                 <label for="cache_geoip" class="col-12 col-lg-4 col-form-label">User Geo IP</label>
@@ -80,11 +80,7 @@
                             <!-- Tombol Submit -->
                             <div class="form-group row">
                                 <div class="col-sm-12 text-right">
-                                    <button type="button" id="cache-loading" class="btn btn-secondary" disabled>
-                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                        Loading...
-                                    </button>
-                                    <button type="submit" id="cache-submit" class="btn btn-secondary">Simpan</button>
+                                    <button type="submit" id="cacheSubmit" class="btn btn-dark">Simpan</button>
                                 </div>
                             </div>
                         </form>
@@ -98,7 +94,7 @@
                         <h3 class="card-title">File Cache</h3>
                     </div>
                     <div class="card-body">
-                        <table id="tabel-data" class="table table-bordered table-hover dataTable">
+                        <table id="tabelData" class="table table-bordered table-hover dataTable">
                             <thead>
                                 <tr>
                                     <th class="all">No.</th>
@@ -121,6 +117,7 @@
 <?= $this->endSection() ?>
 <?= $this->section("js") ?>
 <?= $this->include('plugin/validasi_js') ?>
-<?= $this->include('plugin/tabel_js') ?>
-<script src="<?= base_url('page/setting_cache.min.js') ?>" defer></script>
+<script src="<?= base_url('plugin/datatables/datatables.min.js') ?>" defer></script>
+<script src="<?= base_url('vendor/js/helper_form.min.js') ?>" defer></script>
+<script src="<?= base_url('vendor/js/page_setting_cache.min.js') ?>" defer></script>
 <?= $this->endSection() ?>

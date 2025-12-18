@@ -6,7 +6,7 @@
 <section class="content">
     <div class="container-fluid">
 
-        <div class="stat-container row">
+        <div class="statContainer row">
             <div class="col-6 col-lg-3">
                 <div class="small-box bg-white">
                     <div class="overlay dark">
@@ -114,7 +114,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <table id="tabel-data" class="table table-bordered table-hover dataTable dtr-inline">
+                        <table id="tabelData" class="table table-bordered table-hover dataTable dtr-inline">
                             <thead>
                                 <tr>
                                     <th>No.</th>
@@ -149,9 +149,9 @@
 <?= $this->endSection() ?>
 
 <?= $this->section("js") ?>
-<?= $this->include('plugin/validasi_js') ?>
-<?= $this->include('plugin/tabel_js') ?>
-<script src="<?= base_url('page/helper_statistik.min.js') ?>" defer></script>
-<script src="<?= base_url('page/helper_fetch.min.js') ?>" defer></script>
-<script src="<?= base_url('page/setting_optimasi.min.js') ?>" defer></script>
+<script src="<?= base_url('plugin/datatables/datatables.min.js') ?>" defer></script>
+<script src="<?= base_url('vendor/js/helper_statistik.min.js') ?>" defer></script>
+<script src="<?= base_url('vendor/js/helper_format.min.js') ?>" defer></script>
+<script src="<?= base_url('vendor/js/helper_form.min.js') ?>" defer></script>
+<script src="<?= base_url('vendor/js/page_setting_optimasi.min.js') ?>" defer></script>
 <?= $this->endSection() ?>

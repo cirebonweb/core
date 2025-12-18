@@ -1,4 +1,4 @@
-<form id="situs-form" class="row" data-cek="true">
+<form id="situsForm" class="row" data-cek="true">
     <?= csrf_field() ?>
     <div class="col-md-6 mb-4">
         <label for="siteNama" class="mb-2">Nama Situs</label>
@@ -57,10 +57,6 @@
     </div>
 
     <div class="col-12">
-        <button type="button" id="situs-loading" class="btn btn-dark float-right" disabled>
-            <span class="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span>
-            Loading...
-        </button>
-        <button id="situs-submit" class="btn btn-secondary float-right" type="submit">Simpan</button>
+        <button id="situsSubmit" class="btn btn-dark float-right" type="submit">Simpan</button>
     </div>
 </form>

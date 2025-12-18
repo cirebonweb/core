@@ -8,7 +8,7 @@
 <section class="content">
     <div class="container-fluid">
 
-        <div class="stat-container row">
+        <div class="statContainer row">
             <div class="col-6 col-lg-3">
                 <div class="small-box bg-dark">
                     <div class="overlay dark">
@@ -66,7 +66,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <table id="tabel-data" class="table table-bordered table-hover dataTable dtr-inline">
+                        <table id="tabelData" class="table table-bordered table-hover dataTable dtr-inline">
                             <thead>
                                 <tr>
                                     <th>ID</th>
@@ -76,8 +76,8 @@
                                     <th>Template</th>
                                     <th>Email</th>
                                     <th class="desktop">Judul</th>
-                                    <th>Status</th>
                                     <th>Proses</th>
+                                    <th>Status</th>
                                     <th class="none">Keterangan</th>
                                     <th class="none">Dibuat</th>
                                 </tr>
@@ -92,7 +92,6 @@
 <?= $this->endSection() ?>
 
 <?= $this->section("js") ?>
-<?= $this->include('plugin/tabel_js') ?>
 <script>
     const langText = {
         removeTitle: '<?= lang('App.remove-title') ?>',
@@ -100,7 +99,9 @@
         removeText: '<?= lang('App.remove-text') ?>'
     };
 </script>
-<script src="<?= base_url('page/helper_statistik.min.js') ?>" defer></script>
-<script src="<?= base_url('page/helper_fetch.min.js') ?>" defer></script>
-<script src="<?= base_url('page/log_email.min.js') ?>" defer></script>
+<script src="<?= base_url('plugin/datatables/datatables.min.js') ?>" defer></script>
+<script src="<?= base_url('vendor/js/helper_statistik.min.js') ?>" defer></script>
+<script src="<?= base_url('vendor/js/helper_form.min.js') ?>" defer></script>
+<script src="<?= base_url('vendor/js/helper_format.min.js') ?>" defer></script>
+<script src="<?= base_url('vendor/js/page_log_email.min.js') ?>" defer></script>
 <?= $this->endSection() ?>
