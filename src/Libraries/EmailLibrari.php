@@ -95,7 +95,7 @@ class EmailLibrari
             
             // Pilihan konfigurasi (Switch berdasarkan Dev dan Prod)
             // Untuk menentukan kapan menggunakan $config atau $paperCut di sini
-            $isDevelopment = CI_ENVIRONMENT === 'development';
+            $isDevelopment = env('CI_ENVIRONMENT') === 'development';
 
             $email = Services::email($isDevelopment ? $paperCut : $config);
             $email->setFrom(setting('App.smtpEmail') ?? '', setting('App.smtpNama') ?? '');
