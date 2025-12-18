@@ -48,4 +48,13 @@ class LogEmailModel extends Model
     {
         return $this->select('id')->limit(1)->get()->getRow();
     }
+
+    /**
+	 * Query dasar untuk tabel server side /admin/log/email.
+	 * @var \CodeIgniter\Database\BaseConnection $db
+	 */
+	public function tabel()
+	{
+		return $this->db->table('log_email')->select('*');
+	}
 }

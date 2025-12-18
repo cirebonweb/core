@@ -14,13 +14,11 @@ class AuthLoginsModel extends Model
 
 	public function tabel()
     {
-        return $this
-            ->select('auth_logins.id AS auth_login_id, ip_address, user_agent, id_type, identifier, user_id, date, success,
-                user_login.id AS user_login_id, user_login.*, 
-                users.username')
-            ->join('user_login', 'user_login.login_id = auth_logins.id', 'left')
-            ->join('users', 'users.id = auth_logins.user_id', 'left')
-            ->findAll();
+        return $this->db->table('auth_logins a')
+            ->select('a.id auth_id, ip_address, user_agent, id_type, identifier, date, success,
+                perangkat, os, browser, brand, model, negara, wilayah, distrik, zona_waktu, isp, tipe, error, username')
+            ->join('user_login b', 'b.login_id = a.id', 'left')
+            ->join('users c', 'c.id = a.user_id', 'left');
     }
 
     public function getProfil($userId)

@@ -34,18 +34,16 @@ class UserModel extends Model
 	];
 
 	/**
-	 * Menampilkan data tabel user-list.
-	 * @uses app\Controllers\Profil.php:tabel()
-	 * @return object
+	 * Query dasar untuk tabel server side user-list.
+	 * @var \CodeIgniter\Database\BaseConnection $db
 	 */
-	public function tabelUserList()
+	public function tabel()
 	{
-		return $this
-			->select('users.id iduser, users.username, users.active, 
-				aid.last_used_at, aid.secret email, aid.created_at, aid.updated_at, agu.group')
-			->join('auth_identities aid', 'aid.user_id = users.id AND aid.type = "email_password"', 'left')
-			->join('auth_groups_users agu', 'agu.user_id = users.id', 'left')
-			->get()->getResult();
+		return $this->db->table('users a')
+			->select('a.id iduser, a.username, a.active, a.created_at, a.updated_at,
+			b.last_used_at, b.secret, c.group')
+			->join('auth_identities b', 'b.user_id = a.id AND b.type = "email_password"', 'left')
+			->join('auth_groups_users c', 'c.user_id = a.id', 'left');
 	}
 
 	/**
@@ -78,5 +76,4 @@ class UserModel extends Model
 			->where('users.id', $id)
 			->first();
 	}
-
 }
