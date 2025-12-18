@@ -55,7 +55,7 @@ abstract class BaseController extends Controller
         parent::initController($request, $response, $logger);
 
         // Preload any models, libraries, etc, here.
-
+        $this->request = service('request');
         $this->session = service('session');
         $this->validation = service('validation');
         $this->db = \Config\Database::connect();
