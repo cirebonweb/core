@@ -3,10 +3,11 @@
 namespace Cirebonweb\Controllers\Admin\User;
 
 use App\Controllers\BaseController;
+use CodeIgniter\Shield\Entities\User;
 use Cirebonweb\Models\User\UserModel;
 use Cirebonweb\Models\User\UserProfilModel;
-use CodeIgniter\Shield\Entities\User;
-use Config\AuthGroups;
+use Cirebonweb\Libraries\TabelLibrari;
+use CodeIgniter\Shield\Models\GroupModel;
 
 class UserList extends BaseController
 {
@@ -26,59 +27,76 @@ class UserList extends BaseController
             'pageTitle' => 'Daftar User List',
             'navTitle' => 'User List',
             'navigasi' => '<a href="/admin/user">User</a> &nbsp;',
+            'listGroup' => $this->groupList()
         ];
         return view('Cirebonweb\admin\user\user_list', $data);
     }
 
+    protected function groupList()
+    {
+        // $groupModel = new GroupModel();
+        // return $groupModel->findColumn('group');
+        return ['admin', 'klien'];
+    }
+
     public function tabel()
     {
-        $encrypter = service('encrypter');
-        // $authGroups = new AuthGroups();
-        // $groupList = array_keys($authGroups->groups);
-        $groupList = ['admin', 'klien'];
-        // $aktifMap = ['1' => 'aktif', '0' => 'non aktif'];
-        $aktifMap = [1 => 'aktif', 0 => 'non aktif'];
+        $builder = $this->userModel->tabel();
 
-        $data['data'] = array();
-        $result = $this->userModel->tabelUserList();
-        foreach ($result as $key => $value) {
-
-            $idUser = base64_encode($encrypter->encrypt($value->iduser));
-
-            $aktifDropdown = '<select class="form-select form-select-sm" onchange="updateAktif(this, ' . $value->iduser . ')">';
-            foreach ($aktifMap as $aktifKey => $label) {
-                $selected = ($value->active == $aktifKey) ? ' selected' : '';
-                $aktifDropdown .= '<option value="' . $aktifKey . '"' . $selected . '>' . esc($label) . '</option>';
-            }
-            $aktifDropdown .= '</select>';
-
-            $groupDropdown = '<select class="form-select form-select-sm" onchange="updateGrup(this, ' . $value->iduser . ')">';
-            foreach ($groupList as $groupKey) {
-                $selected = ($value->group === $groupKey) ? 'selected' : '';
-                $groupDropdown .= '<option value="' . $groupKey . '" ' . $selected . '>' . esc($groupKey) . '</option>';
-            }
-            $groupDropdown .= '</select>';
-
-            $ops = '<div class="btn-group" role="group">';
-            $ops .= '<a class="btn btn-sm btn-dark" type="button" onclick="simpan(' . $value->iduser . ')">edit</a>';
-            $ops .= '<a href="' . base_url('profil/?id=') . urlencode($idUser) . '" class="btn btn-sm btn-success" role="button">profil</a>';
-            $ops .= '</div>';
-
-            $data['data'][$key] = array(
-                $value->iduser,
-                $value->username,
-                $value->email,
-                $aktifDropdown,
-                $groupDropdown,
-                $value->last_used_at,
-                $value->created_at,
-                $value->updated_at,
-                $ops,
-                $value->active ? 'aktif' : 'non aktif',
-                $value->group
-            );
+        // Filter tambahan dari AJAX
+        $filterActive = $this->request->getPost('filter_active');
+        if ($filterActive !== null && $filterActive !== '') {
+            $builder->where('active', $filterActive);
         }
-        return $this->response->setJSON($data);
+
+        if ($filterGroup = $this->request->getPost('filter_group')) {
+            $builder->where('group', $filterGroup);
+        }
+
+        // List group untuk dropdown
+        $listGroup = $this->groupList();
+        $encrypter = service('encrypter');
+
+        $dataTable = new TabelLibrari($builder, $this->request);
+        $dataTable->setSearchable(['a.username', 'b.secret']);
+        $dataTable->setDefaultOrder(['a.id' => 'asc']);
+
+        $dataTable->setRowCallback(function ($row) use ($listGroup, $encrypter) {
+            $statusDropdown = '<select class="form-select form-select-sm" onchange="updateStatus(this, ' . $row->iduser . ')">';
+            $statusDropdown .= '<option value="1"' . ($row->active ? ' selected' : '') . '>Aktif</option>';
+            $statusDropdown .= '<option value="0"' . (!$row->active ? ' selected' : '') . '>Non Aktif</option>';
+            $statusDropdown .= '</select>';
+
+            $aksesDropdown = '<select class="form-select form-select-sm" onchange="updateGrup(this, ' . $row->iduser . ')">';
+            foreach ($listGroup as $group) {
+                $selected = ($row->group == $group) ? ' selected' : '';
+                $aksesDropdown .= '<option value="' . $group . '"' . $selected . '>' . ucfirst($group) . '</option>';
+            }
+            $aksesDropdown .= '</select>';
+
+            $idUser = base64_encode($encrypter->encrypt($row->iduser));
+            $aksi = '<div class="btn-group" role="group"><a class="btn btn-sm btn-dark" type="button" onclick="simpan(' . $row->iduser . ')">edit</a>';
+            $aksi .= '<a href="' . base_url('profil/?id=') . urlencode($idUser) . '" class="btn btn-sm btn-success" role="button">profil</a></div>';
+
+            return [
+                $row->iduser,
+                esc($row->username),
+                esc($row->secret),
+                $statusDropdown,
+                $aksesDropdown,
+                // $row->last_used_at ? date('d M Y → H:i:s', strtotime($row->last_used_at)) : 'null',
+                $row->last_used_at,
+                $row->created_at,
+                $row->updated_at,
+                // date('d M Y → H:i:s', strtotime($row->created_at)),
+                // date('d M Y → H:i:s', strtotime($row->updated_at)),
+                $aksi,
+                $row->active ? 'aktif' : 'non aktif',
+                esc($row->group)
+            ];
+        });
+
+        return $this->response->setJSON($dataTable->getResult());
     }
 
     public function getId()
@@ -86,7 +104,8 @@ class UserList extends BaseController
         $id = $this->request->getPost('userId');
         if ($this->validation->check($id, 'required|numeric')) {
             $data = $this->userModel->getId($id);
-            return $this->response->setJSON($data);
+            return $this->response->setJSON(['success' => true, 'data' => $data]);
+            // return $this->response->setJSON($data);
         } else {
             throw new \CodeIgniter\Exceptions\PageNotFoundException();
         }
@@ -161,7 +180,7 @@ class UserList extends BaseController
     {
         // 🔒 Cek permission di awal
         if (! auth()->user()->can('klien.edit')) {
-            return $this->response->setJSON(['success'  => false,'messages' => 'Anda tidak memiliki izin untuk mengedit user.']);
+            return $this->response->setJSON(['success'  => false, 'messages' => 'Anda tidak memiliki izin untuk mengedit user.']);
         }
 
         $response = [];
@@ -219,9 +238,7 @@ class UserList extends BaseController
             }
 
             $this->db->transComplete();
-
             cache()->delete('statistik_user_list');
-
             return $this->response->setJSON($response);
         } catch (\Exception $e) {
             $this->db->transRollback();
@@ -234,48 +251,12 @@ class UserList extends BaseController
         }
     }
 
-    public function updateGrup()
+    public function updateStatus()
     {
         if ($this->request->isAJAX()) {
             try {
-                $group = $this->request->getJSON()->grup;
-                $iduser = $this->request->getJSON()->iduser;
-
-                if (empty($group) || empty($iduser)) {
-                    return $this->response->setJSON(['success' => false, 'messages' => lang("App.invalid-data")]);
-                }
-
-                $users = auth()->getProvider();
-                $user = $users->findById($iduser);
-
-                if ($user->syncGroups($group)) {
-                    cache()->delete('statistik_user_list');
-                    return $this->response->setJSON(['success' => true, 'messages' => lang("App.update-success")]);
-                } else {
-                    return $this->response->setJSON(['success' => false, 'messages' => lang("App.update-error")]);
-                }
-            } catch (\Throwable $e) {
-                $controllerName = get_class($this) . '::' . __FUNCTION__;
-                log_message('critical', $controllerName . ' ' . $e->getMessage() . ' on line ' . $e->getLine());
-                // logCriticalToDb($e, $controllerName);
-
-                return $this->response->setJSON([
-                    'success' => false,
-                    'messages' => 'Terjadi kesalahan: ' . $e->getMessage()
-                    // 'messages' => 'Terjadi kesalahan saat memproses data.'
-                ]);
-            }
-        }
-
-        return $this->response->setJSON(['success' => false, 'messages' => lang("App.update-error")]);
-    }
-
-    public function updateAktif()
-    {
-        if ($this->request->isAJAX()) {
-            try {
-                $active = $this->request->getJSON()->aktif;
-                $iduser = $this->request->getJSON()->iduser;
+                $iduser = $this->request->getPost('iduser');
+                $active = $this->request->getPost('active');
 
                 if (!isset($active) || empty($iduser)) {
                     return $this->response->setJSON(['success' => false, 'messages' => lang("App.invalid-data")]);
@@ -298,27 +279,40 @@ class UserList extends BaseController
             } catch (\Throwable $e) {
                 $controllerName = get_class($this) . '::' . __FUNCTION__;
                 log_message('critical', $controllerName . ' ' . $e->getMessage() . ' on line ' . $e->getLine());
-                // logCriticalToDb($e, $controllerName);
-
-                return $this->response->setJSON([
-                    'success' => false,
-                    'messages' => 'Terjadi kesalahan: ' . $e->getMessage()
-                    // 'messages' => 'Terjadi kesalahan saat memproses data.'
-                ]);
+                return $this->response->setJSON(['success' => false, 'messages' => 'Critical: ' . $e->getMessage()]);
             }
         }
 
         return $this->response->setJSON(['success' => false, 'messages' => lang("App.update-error")]);
     }
 
-    // function logCriticalToDb(\Throwable $e, string $controller)
-    // {
-    //     $db = \Config\Database::connect();
-    //     $db->table('critical_logs')->insert([
-    //         'datetime'   => date('Y-m-d H:i:s'),
-    //         'controller' => $controller,
-    //         'message'    => $e->getMessage(),
-    //         'line'       => $e->getLine()
-    //     ]);
-    // }
+    public function updateGrup()
+    {
+        if ($this->request->isAJAX()) {
+            try {
+                $iduser = $this->request->getPost('iduser');
+                $group = $this->request->getPost('group');
+
+                if (!isset($group) || empty($iduser)) {
+                    return $this->response->setJSON(['success' => false, 'messages' => lang("App.invalid-data")]);
+                }
+
+                $users = auth()->getProvider();
+                $user = $users->findById($iduser);
+
+                if ($user->syncGroups($group)) {
+                    cache()->delete('statistik_user_list');
+                    return $this->response->setJSON(['success' => true, 'messages' => lang("App.update-success")]);
+                } else {
+                    return $this->response->setJSON(['success' => false, 'messages' => lang("App.update-error")]);
+                }
+            } catch (\Throwable $e) {
+                $controllerName = get_class($this) . '::' . __FUNCTION__;
+                log_message('critical', $controllerName . ' ' . $e->getMessage() . ' on line ' . $e->getLine());
+                return $this->response->setJSON(['success' => false, 'messages' => 'Critical: ' . $e->getMessage()]);
+            }
+        }
+
+        return $this->response->setJSON(['success' => false, 'messages' => lang("App.update-error")]);
+    }
 }

@@ -4,6 +4,7 @@ namespace Cirebonweb\Controllers\Admin\Log;
 
 use App\Controllers\BaseController;
 use Cirebonweb\Models\Log\LogEmailModel;
+use Cirebonweb\Libraries\TabelLibrari;
 
 class Email extends BaseController
 {
@@ -26,27 +27,29 @@ class Email extends BaseController
 
     public function tabel()
     {
-        $data['data'] = array();
-        $result = $this->logEmailModel->findAll();
+        $builder = $this->logEmailModel->tabel();
 
-        foreach ($result as $key => $value) {
-            $status = $value->status ? '✅ Berhasil' : '❌ Gagal';
+        $dataTable = new TabelLibrari($builder, $this->request);
+        $dataTable->setSearchable(['admin', 'tipe', 'template', 'email', 'judul', 'status']);
+        $dataTable->setDefaultOrder(['id' => 'desc']);
 
-            $data['data'][$key] = [
-                $value->id,
-                '<input type="checkbox" class="checkItem" value="' . $value->id . '">',
-                $value->admin,
-                $value->tipe,
-                $value->template,
-                $value->email,
-                $value->judul,
-                $value->render . ' detik',
-                $status,
-                $value->error ? $value->error : '-',
-                $value->dibuat
+        $dataTable->setRowCallback(function ($row) {
+            return [
+                $row->id,
+                '<input type="checkbox" class="checkItem" value="' . $row->id . '">',
+                $row->admin,
+                $row->tipe,
+                $row->template,
+                $row->email,
+                $row->judul,
+                $row->render . ' detik',
+                $row->status ? '✅ Berhasil' : '❌ Gagal',
+                $row->error ? $row->error : '-',
+                $row->dibuat
             ];
-        }
-        return $this->response->setJSON($data);
+        });
+
+        return $this->response->setJSON($dataTable->getResult());
     }
 
     public function hapus()
@@ -86,9 +89,7 @@ class Email extends BaseController
 
         try {
             $this->logEmailModel->truncate();
-
             cache()->delete('statistik_log_email');
-
             $response = ['success' => true, 'messages' => lang("App.delete-success")];
         } catch (\Throwable $e) {
             log_message('error', 'Reset failed: ' . $e->getMessage());
@@ -98,6 +99,7 @@ class Email extends BaseController
         return $this->response->setJSON($response);
     }
 
+    // tidak dipakai
     public function refresh()
     {
         try {

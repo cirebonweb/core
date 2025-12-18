@@ -233,7 +233,7 @@ class Optimasi extends BaseController
 
             return $this->response->setJSON([
                 'success' => true,
-                'messages' => 'Cache berhasil di generate ulang.'
+                'messages' => 'Tabel database berhasil di generate ulang.'
             ]);
         } catch (\Throwable $e) {
             return $this->response->setJSON([

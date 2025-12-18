@@ -4,6 +4,7 @@ namespace Cirebonweb\Controllers\Admin\User;
 
 use App\Controllers\BaseController;
 use Cirebonweb\Models\Auth\AuthLoginsModel;
+use Cirebonweb\Libraries\TabelLibrari;
 
 class UserLogin extends BaseController
 {
@@ -26,38 +27,48 @@ class UserLogin extends BaseController
 
     public function tabel()
     {
-        $data['data'] = array();
-        $result = $this->authLoginsModel->tabel();
-        foreach ($result as $key => $value) {
+        $builder = $this->authLoginsModel->tabel();
 
-            $status = $value->success ? '✅ Berhasil' : '❌ Gagal';
-            
-            $ip_address = ($value->ip_address === '::1') ? '127.0.0.1' : $value->ip_address;
-
-            $data['data'][$key] = [
-                $value->auth_login_id,
-                '<input type="checkbox" class="checkItem" value="' . $value->auth_login_id . '">',
-                $status,
-                $value->date,
-                $value->id_type,
-                $value->username ? $value->username : '-',
-                $value->identifier,
-                $ip_address,
-                $value->perangkat ? $value->perangkat : '-',
-                $value->os,
-                $value->browser,
-                $value->brand . ' → ' . $value->model,
-                $value->user_agent,
-                $value->negara ? $value->negara : '-',
-                $value->wilayah ? $value->wilayah : '-',
-                $value->distrik ? $value->distrik : '-',
-                $value->zona_waktu ? $value->zona_waktu : '-',
-                $value->isp ? $value->isp : '-',
-                $value->tipe ? $value->tipe : '-',
-                $value->error ? $value->error : '-'
-            ];
+        // Filter tambahan dari AJAX
+        $filterStatus = $this->request->getPost('filter_status');
+        if ($filterStatus !== null && $filterStatus !== '') {
+            $builder->where('success', $filterStatus);
         }
-        return $this->response->setJSON($data);
+
+        if ($filterPerangkat = $this->request->getPost('filter_perangkat')) {
+            $builder->where('perangkat', $filterPerangkat);
+        }
+
+        $dataTable = new TabelLibrari($builder, $this->request);
+        $dataTable->setSearchable(['id_type', 'identifier', 'os', 'browser', 'brand', 'model', 'negara', 'wilayah', 'distrik', 'isp', 'tipe', 'error', 'username']);
+        $dataTable->setDefaultOrder(['a.id' => 'desc']);
+
+        $dataTable->setRowCallback(function ($row) {
+            return [
+                $row->auth_id,
+                '<input type="checkbox" class="checkItem" value="' . $row->auth_id . '">',
+                $row->success ? '✅ Berhasil' : '❌ Gagal',
+                $row->date,
+                $row->id_type,
+                $row->username ?? 'null',
+                $row->identifier,
+                $row->ip_address,
+                $row->perangkat ?? 'null',
+                $row->os,
+                $row->browser,
+                $row->brand . ' → ' . $row->model,
+                $row->user_agent,
+                $row->negara ?? 'null',
+                $row->wilayah ?? 'null',
+                $row->distrik ?? 'null',
+                $row->zona_waktu ?? 'null',
+                $row->isp ?? 'null',
+                $row->tipe ?? 'null',
+                $row->error ?? 'null'
+            ];
+        });
+
+        return $this->response->setJSON($dataTable->getResult());
     }
 
     public function hapus()
@@ -85,9 +96,9 @@ class UserLogin extends BaseController
 
             cache()->delete('statistik_user_login');
 
-            $response = ['sukses'  => true, 'messages' => lang("App.delete-success")];
+            $response = ['success'  => true, 'messages' => lang("App.delete-success")];
         } else {
-            $response = ['sukses'  => false, 'messages' => lang("App.delete-error")];
+            $response = ['success'  => false, 'messages' => lang("App.delete-error")];
         }
         return $this->response->setJSON($response);
     }

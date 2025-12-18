@@ -81,11 +81,12 @@ class Cache extends BaseController
                         $expireTimestamp = $cacheData['time'] + $ttl;
                         $now = time();
 
-                        // Kalau mau hitung sisa waktu dari sekarang
+                        // Hitung sisa waktu dari sekarang
                         $remaining = $expireTimestamp - $now;
 
                         if ($remaining < 0) {
-                            $timeExpire = '<span class="lencana bg-danger">expired</span>';
+                            $timeExpire = '<span class="text-danger">berakhir</span>';
+                            // $timeExpire = '<span class="lencana bg-danger">expired</span>';
                         } else {
                             $days = floor($remaining / 86400); // 1 hari = 86400 detik
 
