@@ -99,7 +99,7 @@ Perintah: `php spark cirebonweb:publish [--all|--config|--controllers|--views|--
 |---|---|---|
 | `--config` | `src/Publish/Config` → `app/Config` | Sekali, saat setup awal. |
 | `--controllers` | `src/Publish/Controllers` → `app/Controllers` | Sekali, termasuk contoh `Home`; `BaseController` disediakan skeleton APP. |
-| `--views` | `src/Publish/Views` → `app/Views` | Sekali, untuk `layout/template.php`, `404.php`, `plugin/*`. |
+| `--views` | `src/Publish/Views` → `app/Views` | Sekali, untuk view bootstrap dan titik penyesuaian navigasi APP. |
 | `--public` | `src/Publish/Public` → `public/` | Sekali. Aset statis. |
 | `--writable` | `src/Publish/Writable` → `writable/` | Sekali. Runtime `json/crb_cache.json`. |
 | `--force` | modifier | Menimpa file yang isinya sudah diedit app. Tanpa ini, file yang berubah **dilewati**. |
@@ -119,8 +119,8 @@ paket dengan `php spark migrate --all`; migrasi tidak dipublish ke APP.
   bertanggung jawab menyesuaikan policy-nya; route CORE tanpa filter tetap publik.
   Routes bawaan skeleton CI4 diganti secara otomatis; route APP yang telah
   dikustomisasi tidak ditimpa tanpa `--force`.
-- `plugin/` dan `vendor/` di `public/` **tidak pernah** dipublish — keduanya aset rawatan; project menyalin manual dari paket (lihat §4c & `COMMAND.md`). `upload/` justru **boleh** dipublish sekali (aset instalasi).
-- `Publish/Views` dan `Publish/Controllers` mengecualikan sejumlah berkas dari salinan; daftar pengecualian terkini ada di `src/Commands/Publish.php`.
+- Grup publish menyalin seluruh isi folder sumber secara rekursif. Untuk `--public`, ini mencakup `plugin/`, `vendor/`, `upload/`, dan `.htaccess`; untuk `--views` dan `--controllers`, seluruh file sumber ikut disalin.
+- Tanpa `--force`, file tujuan yang berbeda dilewati; `--force` menimpa salinan APP yang telah disesuaikan.
 - Publish **tidak** pernah menyalin `src/Views/` (isi `Cirebonweb\`) ke `app/Views/`. Itu batas anti-timpa yang utama.
 
 ### Perilaku anti-timpa
@@ -169,31 +169,18 @@ hapus data tersebut sebelum menjalankan seeder di lingkungan produksi.
 
 ---
 
-## 4c. Aset:instalasi vs rawatan
+## 4c. Aset publik
 
-Di dalam `src/Publish/Public/` ada dua jenis folder yang sifatnya **berbeda**, dan itu harus dibedakan agar jelas siapa yang bertanggung jawab:
+Perintah `--public` dan `--all` menyalin seluruh isi `src/Publish/Public/` ke
+`public/`, termasuk aset AdminLTE, plugin, helper CORE, logo, dan `.htaccess`.
+Tidak ada folder aset yang dikecualikan dari publish.
 
-| Jenis | Arti | Perilaku publish | Di-Review |
-|---|---|---|---|
-| **Instalasi** | File yang **hanya dipakai app baru** saat pertama kali setup. Setelah itu menjadi milik app dan tidak disentuh lagi. | **Boleh** di-publish satu kali. | Milik app setelah install. |
-| **Rawat** | File bawaan core yang **akan di-replace saat ada perubahan** — AdminLte pihak ketiga, plugin, dan helper JS core. Bertanggung jawab: pemilik core. | **Tidak pernah** di-publish. | Diurus pemilik core. |
+Pada instalasi awal, file sumber disalin otomatis. Jika file tujuan sudah ada
+dengan isi berbeda, publisher melewatinya tanpa `--force`; gunakan `--force`
+hanya bila memang ingin mengganti salinan APP yang sudah disesuaikan. Sumber
+aset tetap dirawat di paket CORE, sementara salinan hasil publish berada di APP.
 
-### Pemetaan folder saat ini
-
-| Folder di `src/Publish/Public/` | Jenis | Alasan |
-|---|---|---|
-| `plugin/` | **Rawat** | Bawaan core yang akan diperbarui. Diurus manual oleh pemilik core. |
-| `vendor/` | **Rawat** | Bawaan core (AdminLte + helper JS). Diurus manual oleh pemilik core. |
-| `upload/` | **Instalasi** | Hanya dipakai app baru (logo default, favicon). Setelah install menjadi milik app. |
-| `.htaccess` | **Instalasi** | Rewrite CI4 + kompresi (`mod_deflate`) & cache (`mod_expires`). Ditulis sekali saat setup (butuh `--force`); setelah app mengedit, core tidak menimpanya. |
-
-### Kenapa AdminLte & plugin tetap di folder rawatan?
-
-Meskipun AdminLte dan plugin adalah pihak ketiga, keduanya **bawaan core** dan **nanti akan ada perubahan** (patch keamanan, update versi, custom theme milik core). Jadi diperlakukan sebagai **rawatan**: file tetap di `src/Publish/Public/` sebagai sumber, tapi **tidak** di-publish ke project.
-
-Aset AdminLte yang dulunya di `dist/` sudah dipindahkan ke `vendor/` (lihat §4d).
-
-### Struktur `public/vendor/` (hasil akhir)
+### Struktur `public/vendor/`
 
 ```
 public/vendor/
@@ -210,15 +197,11 @@ public/vendor/
 │   ├── helper_statistik.min.js
 │   ├── helper_upload_single.min.js
 │   ├── helper_upload_multi.min.js
-│   ├── page_profil.min.js        # helper JS halaman core (tetap di paket)
-│   ├── page_user_list.min.js
-│   ├── page_user_login.min.js
-│   ├── page_log_email.min.js
-│   └── page_setting_{umum,cache,logo,optimasi}.min.js  # idem — halaman inti tidak dipublish
-└── ... (aset pihak ketiga lain)
+│   └── page_profil.min.js
+└── ... (aset vendor dan helper CORE lainnya)
 ```
 
-> Semua referensi di template sudah diubah dari `dist/css/…` → `vendor/css/…` dan `dist/js/…` → `vendor/js/…`.
+> Semua referensi di template menggunakan `vendor/css/…` dan `vendor/js/…`.
 
 ### Struktur `public/plugin/` (hasil akhir)
 
@@ -229,7 +212,7 @@ public/plugin/
 │   ├── bootstrap.min.css            # dipakai template & shield/layout
 │   └── icheck-bootstrap.min.css     # dipakai shield/layout (gaya checkbox icheck)
 ├── datatables/
-│   ├── datatables.min.css           # dipakai Views/plugin/tabel_css.php
+│   ├── datatables.min.css           # dipakai Views/plugin/css_tabel.php
 │   └── datatables.min.js            # tabel server-side: user_list, user_login, log_email, cache, optimasi
 ├── jquery/
 │   ├── jquery.min.js                # jQuery 3.7.1 — template & shield/layout
@@ -249,11 +232,8 @@ public/plugin/
     └── sweetalert2.min.js
 ```
 
-> **Status pakai:** `jquery-ui.*` + `jquery/images/`, dan `select2/` **belum direferensikan**
-> kode core maupun app uji. `select2` sengaja tetap disediakan (ramping: hanya build `.min`
-> + `i18n` `id`/`en`) untuk kebutuhan app; `jquery-ui` kandidat dipangkas.
-> `select2.full.*` **tidak disertakan** lagi — pakai build standar.
-> Tinjau pemakaian aset sebelum menghapus atau menambahkannya.
+> Aset plugin dipublish bersama sumber CORE. Tinjau pemakaiannya sebelum
+> menghapus atau menambahkannya.
 
 
 ---
@@ -406,11 +386,11 @@ class Crb extends BaseCrb
 
 | File | Alasan |
 |---|---|
-| `src/Controllers/**` | Udah dibaca via namespace `Cirebonweb\`. Menyalinnya berarti gosh duplication & versi basi. |
+| `src/Controllers/**` | Sudah dibaca via namespace `Cirebonweb\`. Menyalinnya berarti duplikasi dan versi basi. |
 | `src/Views/**` | Sama — termasuk `layout/navbar.php`, `sidebar.php`, `*_vendor.php`. |
 | `src/Models/**`, `src/Libraries/**`, `src/Helpers/**` | Semua dipanggil lewat autoload PSR-4 `Cirebonweb\` atau autoload helper. |
 | `src/Database/Seeds/*` | Seeder tidak dipublish dan dijalankan secara eksplisit oleh APP. |
 
-> `Admin/Dashboard.php`, `Klien/Dashboard.php` dan view `dashboard.php` /
-> `klien/dashboard.php` masih berada di `src/Publish/` dan dikecualikan dari
-> publish; `Home.php` adalah contoh bootstrap yang ikut dipublish.
+> `src/Publish/Controllers/Home.php` adalah contoh bootstrap yang ikut
+> dipublish. File di `src/Controllers/` dan `src/Views/` tetap dimuat langsung
+> dari paket melalui namespace `Cirebonweb\`.

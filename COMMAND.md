@@ -26,7 +26,7 @@ php spark cirebonweb:publish --writable
 ```
 
 > Perilaku publish **tanpa `--force`**: file yang isinya sudah berbeda **tidak**
-> ditimpa (ditandai `!`, dihitung "dilewati"). Detail blokir & anti-timpa:
+> ditimpa (ditandai `!`, dihitung "dilewati"). Detail anti-timpa:
 > `ARSITEKTUR.md` §4.
 
 > Flag `--force` dan `--dry-run` adalah modifier (bisa digabung dengan grup
@@ -41,9 +41,8 @@ php spark cirebonweb:publish --writable
 > **Awas flag mirip:** grup core bernama `--views` (jamak), bukan `--view`.
 > Database CORE tidak dipublish; migrasi ditemukan langsung dari paket.
 
-> **`--all` tidak berarti "semua aset ikut."** `public/plugin/` dan
-> `public/vendor/` tetap diblokir (aset rawatan) dan harus disalin manual —
-> lihat §Publish public.
+> `--all` menjalankan semua grup dan menyalin seluruh isi masing-masing sumber,
+> termasuk aset `plugin/`, `vendor/`, dan `upload/` dari `src/Publish/Public`.
 
 ## 🚀 Publish config
 ```bash
@@ -62,7 +61,6 @@ app/
 └── Config/
     ├── App.php
     ├── Auth.php
-    ├── AuthGroups.php
     ├── Autoload.php
     ├── CrbAkses.php
     ├── CrbMenu.php
@@ -90,14 +88,14 @@ mengaudit semua form dan request AJAX.
  php spark cirebonweb:publish --controllers
 ```
 
-> Grup `controllers` mem-publish `src/Publish/Controllers` **kecuali** yang diblokir
-> (`Admin/Dashboard.php`, `Klien/Dashboard.php` — lihat `Publish.php::$blocked`).
+> Grup `controllers` menyalin seluruh isi `src/Publish/Controllers`.
+> Saat ini sumbernya hanya berisi `Home.php`; `BaseController.php` tetap berasal
+> dari skeleton APP.
 >
 > | File | Status |
 > |---|---|
 > | `BaseController.php` | ✅ berasal dari skeleton APP |
 > | `Home.php` | ✅ dipublish sebagai contoh halaman awal APP |
-> | `Admin/Dashboard.php`, `Klien/Dashboard.php` | ⛔ dikecualikan dari publish |
 
 ### 📁 controllers files to be published
 ```ruby
@@ -106,9 +104,7 @@ app/
     └── Home.php
 ```
 
-> `Admin/Dashboard.php` dan `Klien/Dashboard.php` tetap ada di
-> `src/Publish/Controllers/` tetapi dikecualikan dari publish. `Home.php` ikut
-> dipublish sebagai contoh yang dapat disesuaikan APP.
+> `Home.php` ikut dipublish sebagai contoh yang dapat disesuaikan APP.
 
 ## 🗄️ CORE database
 
@@ -136,60 +132,48 @@ php spark cirebonweb:publish --public
 
 ### 📁 Asset files to be published
 
-> Grup `public` mem-publish `src/Publish/Public` **kecuali** yang diblokir
-> (`plugin/`, `vendor/` — aset rawatan, dikelola manual pemilik core;
-> lihat `Publish.php::$blocked` dan `ARSITEKTUR.md` §4c).
-> Yang ikut ter-publish hanya `.htaccess` + `upload/`.
+> Grup `public` menyalin seluruh isi `src/Publish/Public`, termasuk `.htaccess`,
+> `plugin/`, `upload/`, dan `vendor/`.
 
 ```ruby
 public/
-├── .htaccess    # rewrite CI4 + kompresi/cache (sekali, butuh --force)
-└── upload/      # logo & gambar default milik app baru
-    ├── logo/
-    └── profil/
+├── .htaccess
+├── plugin/      # Bootstrap, DataTables, jQuery, Pica, Select2, SweetAlert
+├── upload/      # logo dan gambar profil default
+└── vendor/
+    ├── css/     # AdminLTE dan stylesheet CORE
+    └── js/      # AdminLTE dan helper CORE
 ```
 
-### ⚠️ Aset rawatan tidak ikut publish — salin manual
-
-Setelah `--public` (atau `--all`) selesai, `public/` **belum** punya CSS/JS
-AdminLTE maupun plugin. `plugin/` dan `vendor/` memang diblokir dari publish
-(`Publish.php::$blocked['public']`), jadi project wajib menyalinnya sendiri dari
-paket:
-
-```powershell
-Copy-Item vendor/cirebonweb/core/src/Publish/Public/plugin public/plugin -Recurse
-Copy-Item vendor/cirebonweb/core/src/Publish/Public/vendor public/vendor -Recurse
-```
-
-Kalau terlewat, halaman tetap 200 tapi **tanpa styling** — `adminlte.min.css`,
-`core.min.js`, dan `plugin/*` akan 404. Itulah alasan blokir ini ada: aset adalah
-milik core dan berubah sepihak, jadi core tidak boleh menimpa versinya sendiri
-di project (`ARSITEKTUR.md` §4c).
+Pada publish pertama, aset-aset tersebut ikut disalin otomatis. Jika file tujuan
+sudah ada dan isinya berbeda, publisher melewatinya kecuali `--force` digunakan.
+Gunakan `--force` hanya jika memang ingin mengganti salinan APP yang sudah
+disesuaikan.
 
 ## 🚀 Publish views
 ```bash
 php spark cirebonweb:publish --views
 ```
 
-> Grup `views` mem-publish `src/Publish/Views` **kecuali** yang diblokir
-> (`profil.php`, `dashboard.php`, `admin/dashboard.php`, `klien/dashboard.php`,
-> `layout/template_old.php` — lihat `Publish.php::$blocked` dan
-> `ARSITEKTUR.md` §7).
+> Grup `views` menyalin seluruh isi `src/Publish/Views`; tidak ada daftar file
+> yang dikecualikan.
 
 ### 📁 View files to be published
 ```ruby
 app/
 └── Views/
+    ├── home.php
+    ├── profil.php
     ├── layout/
-    │   ├── 404.php
+    │   ├── navbar_menu.php
+    │   ├── sidebar_menu.php
     │   └── template.php
     └── plugin/
-        ├── tabel_css.php
-        └── validasi_js.php
+        ├── css_tabel.php
+        └── js_tabel_form.php
 ```
 
-> `profil.php`, `dashboard.php`, `admin/`, `klien/`, `template_old.php` **tetap ada**
-> di `src/Publish/Views/` tetapi dikecualikan dari publish sesuai kebijakan saat ini.
+`navbar_menu.php` dan `sidebar_menu.php` adalah titik penyesuaian navigasi APP.
 
 ## 🚀 Publish writable
 ```bash

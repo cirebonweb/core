@@ -18,9 +18,9 @@ cirebonweb:publish --all` to add the CORE configuration, starter routes, and
 example home page to a new APP.
 
 After publishing, set environment-specific APP values such as the database
-connection, and copy the maintained `public/plugin/` and `public/vendor/`
-assets as described below. CORE features themselves remain in the package and
-are loaded directly by the APP.
+connection and encryption key. The `--all` command publishes the bootstrap
+configuration and public assets; CORE features themselves remain in the package
+and are loaded directly by the APP.
 
 Designed for maintainers, interns, and scalable systems. Built with clarity, auditability, and frontend control in mind.
 A modular, production-ready admin dashboard built on **CodeIgniter 4+** and **AdminLTE 3.2**. Includes:
@@ -95,17 +95,7 @@ php spark shield:setup
 php spark cirebonweb:publish --all
 ```
 
-5. copy maintained assets manually
-* `public/plugin/` and `public/vendor/` are **not** published by design — they are
-  maintained assets owned by the core package. Copy them once from the package:
-```bash
-cp -r vendor/cirebonweb/core/src/Publish/Public/plugin public/plugin
-cp -r vendor/cirebonweb/core/src/Publish/Public/vendor public/vendor
-```
-* skip this step and every page still returns 200, but without styling
-  (`adminlte.min.css`, `core.min.js`, `plugin/*` all 404)
-
-6. run database migrations
+5. run database migrations
 * ensure the APP environment already has valid database settings before migration
 ```bash
 php spark migrate --all
@@ -113,7 +103,7 @@ php spark migrate --all
 * the package ships `HapusTabelUserLogin` only to clean up a leftover `user_login`
   table from older versions — it is harmless on a fresh install
 
-7. run seeders if needed
+6. run seeders if needed
 * seeders are examples provided by CORE and are not published by the publish
   command. Run them explicitly by their fully qualified class name if needed:
 ```bash
@@ -123,7 +113,7 @@ php spark db:seed 'Cirebonweb\Database\Seeds\UserSeeder'
 * `UserSeeder` creates sample accounts. Review the seeder and change or remove
   sample credentials before using it in production.
 
-8. run the project
+7. run the project
 ```bash
 php spark serve
 ```
