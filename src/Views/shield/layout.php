@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" crossorigin="anonymous" />
     <link rel="stylesheet" href="<?= base_url('plugin/bootstrap/icheck-bootstrap.min.css') ?>" />
-    <link rel="stylesheet" href="<?= base_url('dist/css/adminlte.min.css') ?>" />
+    <link rel="stylesheet" href="<?= base_url('vendor/css/adminlte.min.css') ?>" />
     <style>
         body {
             background-color: #e6eaef;
@@ -52,7 +52,7 @@
 
 <script src="<?= base_url('plugin/jquery/jquery.min.js') ?>"></script>
 <script src="<?= base_url('plugin/bootstrap/bootstrap.bundle.min.js') ?>"></script>
-<script src="<?= base_url('dist/js/adminlte.min.js') ?>"></script>
+<script src="<?= base_url('vendor/js/adminlte.min.js') ?>"></script>
 <?= $this->renderSection('js') ?>
 </body>
 

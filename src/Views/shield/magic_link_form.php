@@ -26,7 +26,6 @@
                     </div>
 
                     <div class="row">
-                        <?= $this->include('Cirebonweb\Shield\recaptcha') ?>
                         <div class="col-12"> <button type="submit" class="btn btn-primary btn-block">Kirim Link</button> </div>
                     </div>
                 </form>
@@ -45,20 +44,7 @@
     <script src="<?= base_url('plugin/jquery/jquery.validate.min.js') ?>"></script>
     <script src="<?= base_url('plugin/jquery/jquery.validate_id.min.js') ?>"></script>
     <script src="<?= base_url('plugin/jquery/additional-methods.min.js') ?>"></script>
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <script>
-        <?php if (setting('App.gRecaptcha') === "true") : ?>
-            $(function() {
-                $('#magicForm').on('submit', function(e) {
-                    var response = grecaptcha.getResponse();
-                    if (response.length === 0) {
-                        e.preventDefault(); // hentikan submit
-                        alert('Silakan centang reCAPTCHA terlebih dahulu.');
-                    }
-                });
-            });
-        <?php endif ?>
-
         function IsEmail(email) {
             const regex = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
             return regex.test(email);

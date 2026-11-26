@@ -9,26 +9,42 @@ use Cirebonweb\Libraries\AuthLoginsLastIdLibrari;
 use Cirebonweb\Libraries\AuthRememberLastIdLibrari;
 use Cirebonweb\Libraries\AuthSesiLibrari;
 
-Events::on('DBQuery', static function (Query $query) {
+Events::on('DBQuery', static function (Query $query): void {
     if (! $query->isWriteType()) {
         return;
     }
 
-    $sql = strtolower((string) $query);
-    $db = Database::connect();
+    $sql = str_replace(['`', '"'], '', $query->getOriginalQuery());
 
-    if (strpos($sql, 'insert into `auth_logins`') !== false) {
-        AuthLoginsLastIdLibrari::setId($db->insertID());
-    }
-
-    if (strpos($sql, 'insert into `auth_remember_tokens`') !== false) {
-        $lastRememberId = $db->insertID();
-        AuthRememberLastIdLibrari::setId($lastRememberId);
+    if (stripos($sql, 'auth_') === false) {
         return;
     }
 
-    if (strpos($sql, 'insert into `auth_sesi`') !== false) {
-        $rememberId = AuthRememberLastIdLibrari::getId();
-        (new AuthSesiLibrari())->insertAuthSesi($rememberId);
+    if (preg_match('/\binsert\s+into\s+([\w$.]+)/i', $sql, $cocok) !== 1) {
+        return;
+    }
+
+    $db = Database::connect();
+    $namaTabel = $cocok[1];
+    $pos       = strrpos($namaTabel, '.');
+    $tabel     = strtolower($pos === false ? $namaTabel : substr($namaTabel, $pos + 1));
+    $prefix    = strtolower($db->DBPrefix);
+
+    if ($prefix !== '' && str_starts_with($tabel, $prefix)) {
+        $tabel = substr($tabel, strlen($prefix));
+    }
+
+    if ($tabel === 'auth_logins') {
+        AuthLoginsLastIdLibrari::setId($db->insertID());
+        return;
+    }
+
+    if ($tabel === 'auth_remember_tokens') {
+        AuthRememberLastIdLibrari::setId($db->insertID());
+        return;
+    }
+
+    if ($tabel === 'auth_sesi') {
+        (new AuthSesiLibrari())->insertAuthSesi(AuthRememberLastIdLibrari::getId());
     }
 });

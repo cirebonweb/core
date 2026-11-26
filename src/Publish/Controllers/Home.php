@@ -4,23 +4,30 @@ namespace App\Controllers;
 
 class Home extends BaseController
 {
-    public function index()
+    public function index(): string
     {
-        $user = auth()->user();
+        return view('home', ['navigasi' => '']);
 
-        if ($user->inGroup('klien')) {
-            return redirect()->to('klien');
-        }
+        /**
+         * Opsi untuk dua grup pengguna yang berbeda, misalnya 'admin' dan 'user'.
+         */
+        // $user = auth()->user();
 
-        return redirect()->to('admin');
+        // if ($user->inGroup('user')) {
+        //     return redirect()->to('user');
+        // }
 
-        // -- options for multiple groups --
+        // return redirect()->to('admin');
+
+        /**
+         * Opsi untuk beberapa grup pengguna.
+         */
         // if ($user->inGroup('admin') || $user->inGroup('superadmin')) {
         //     return redirect()->to('admin');
         // }
 
-        // if ($user->inGroup('klien')) {
-        //     return redirect()->to('klien');
+        // if ($user->inGroup('user')) {
+        //     return redirect()->to('user');
         // }
 
         // return redirect()->to('beta');

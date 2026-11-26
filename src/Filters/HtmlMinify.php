@@ -8,70 +8,58 @@ use CodeIgniter\Filters\FilterInterface;
 
 class HtmlMinify implements FilterInterface
 {
-    /**
-     * Do nothing on request.
-     *
-     * @param RequestInterface $request
-     * @param array|null       $arguments
-     * @return mixed
-     */
     public function before(RequestInterface $request, $arguments = null)
     {
-        // No action needed before controller
+        // no-op
     }
 
-    /**
-     * Minify HTML output on response.
-     *
-     * @param RequestInterface  $request
-     * @param ResponseInterface $response
-     * @param array|null        $arguments
-     * @return mixed
-     */
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
-        // Pastikan kita tidak di lingkungan 'development' dan response-nya adalah HTML
-        if (ENVIRONMENT === 'development' || strpos($response->getHeaderLine('Content-Type'), 'text/html') === false) {
+        if (ENVIRONMENT === 'development') {
+            return $response;
+        }
+
+        if (stripos($response->getHeaderLine('Content-Type'), 'text/html') === false) {
             return $response;
         }
 
         $buffer = $response->getBody();
+        if ($buffer === '' || $buffer === null) {
+            return $response;
+        }
 
+        // ── 1. Proteksi blok yang tidak boleh diminify ──────────────
+        $blocks  = [];
+        $patterns = [
+            '#<script\b[^>]*>.*?</script>#is',       // inline JS
+            '#<style\b[^>]*>.*?</style>#is',         // inline CSS
+            '#<pre\b[^>]*>.*?</pre>#is',             // preformatted
+            '#<textarea\b[^>]*>.*?</textarea>#is',   // textarea
+        ];
+
+        foreach ($patterns as $pattern) {
+            $buffer = preg_replace_callback($pattern, function ($m) use (&$blocks) {
+                $key = '%%MINIFY_BLOCK_' . count($blocks) . '%%';
+                $blocks[$key] = $m[0];
+                return $key;
+            }, $buffer);
+        }
+
+        // ── 2. Minify HTML (aman, JS/CSS sudah diproteksi) ──────────
         $search = [
-            '/\>[^\S ]+/s',     // strip whitespaces after tags, except space
-            '/[^\S ]+\</s',     // strip whitespaces before tags, except space
-            '/(\s)+/s',         // shorten multiple whitespace sequences
-            '//' // Remove HTML comments
+            '/<!--(?!\[if).*?-->/s',   // hapus komentar HTML (kecuali conditional)
+            '/\>[^\S ]+/s',            // whitespace setelah tag
+            '/[^\S ]+\</s',            // whitespace sebelum tag
+            '/(\s)+/s',                // multi-whitespace → satu spasi
         ];
+        $replace = ['', '>', '<', '\\1'];
 
-        $replace = [
-            '>',
-            '<',
-            '\\1',
-            ''
-        ];
-
-        // Optimasi: Gunakan Regex yang lebih sederhana dan fokus pada penghapusan spasi yang tidak perlu.
         $buffer = preg_replace($search, $replace, $buffer);
 
-        // Tambahkan lagi minifikasi yang spesifik dari kode lama Anda untuk stripping
-        $search_specific = [
-            '/\>\s+\</', // strip whitespaces between tags
-            '/(\"|\')\s+\>/', // strip whitespaces between quotation ("') and end tags
-            '/=\s+(\"|\')/' // strip whitespaces between = "'
-        ];
+        // ── 3. Kembalikan blok yang diproteksi ──────────────────────
+        $buffer = strtr($buffer, $blocks);
 
-        $replace_specific = [
-            '><',
-            '$1>',
-            '=$1'
-        ];
-
-        $buffer = preg_replace($search_specific, $replace_specific, $buffer);
-
-        // Set ulang body response
         $response->setBody($buffer);
-
         return $response;
     }
 }

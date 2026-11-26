@@ -3,15 +3,26 @@
 namespace Cirebonweb\Controllers;
 
 use App\Controllers\BaseController;
-use Cirebonweb\Models\User\UserModel;
-use Cirebonweb\Models\User\UserProfilModel;
-use Cirebonweb\Models\Auth\AuthSesiModel;
+use Cirebonweb\Models\UserModel;
+use Cirebonweb\Models\UserProfilModel;
+use Cirebonweb\Models\AuthSesiModel;
 use CodeIgniter\I18n\Time;
 
 class Profil extends BaseController
 {
+    /**
+     * @var \Cirebonweb\Models\UserModel $userModel
+     */
     protected $userModel;
+
+    /**
+     * @var \Cirebonweb\Models\UserProfilModel $userProfilModel
+     */
     protected $userProfilModel;
+
+    /**
+     * @var \Cirebonweb\Models\AuthSesiModel $authSesiModel
+     */
     protected $authSesiModel;
 
     public function __construct()
@@ -62,10 +73,10 @@ class Profil extends BaseController
     public function getPerangkat()
     {
         $userId = auth()->id();
-        $sesi = $this->authSesiModel->getProfil($userId, 8);
-        $sesiId = session_name() . ':' . session_id();
-        $now = Time::now()->getTimestamp();
+        $appTimezone = config('App')->appTimezone;
         $sesiExpire = config('Session')->expiration;
+        $sesi = $this->authSesiModel->getProfil($userId, 8, $sesiExpire);
+        $sesiId = session_name() . ':' . session_id();
 
         foreach ($sesi as &$s) {
             $s->ip_publik = ($s->ip_address === '::1') ? '127.0.0.1' : $s->ip_address;
@@ -81,25 +92,21 @@ class Profil extends BaseController
             }
 
             $s->remember = is_null($s->remember_id) ? 'bi-toggle-off' : 'bi-toggle-on';
-            $lastActivity = strtotime($s->dibuat);
-            $isExpired = ($lastActivity + $sesiExpire) <= $now;
+            $lastActivity = (int) $s->timestamp_unix;
+            $timeAgo = Time::createFromTimestamp($lastActivity, $appTimezone)->humanize();
+            $timeAgo = str_replace('"', '', $timeAgo);
+            $s->dibuat = $s->dibuat
+                ? Time::parse($s->dibuat, $appTimezone)->format('d M Y H:i')
+                : 'Tidak diketahui';
 
-            if ($s->id === $sesiId && !$isExpired) {
+            if ($s->id === $sesiId) {
                 $s->warna = 'text-success';
                 $s->ikon = 'bi-caret-right-fill';
                 $s->status = '<span class="lencana bg-success">Perangkat aktif</span>';
-            } elseif (!$isExpired) {
-                $timeAgo = Time::createFromTimestamp($lastActivity)->humanize();
-                $timeAgo = str_replace('"', '', $timeAgo);
+            } else {
                 $s->warna = 'text-secondary';
                 $s->ikon = 'bi-caret-right';
                 $s->status = '<span class="lencana bg-secondary">Aktif ' . $timeAgo . '</span>';
-            } else {
-                $timeAgo = Time::createFromTimestamp($lastActivity)->humanize();
-                $timeAgo = str_replace('"', '', $timeAgo);
-                $s->ikon = 'bi-caret-right';
-                $s->warna = 'text-secondary';
-                $s->status = '<span class="lencana bg-secondary">Berakhir ' . $timeAgo . '</span>';
             }
         }
 
@@ -122,7 +129,7 @@ class Profil extends BaseController
         }
 
         $sesiNonAktif = $this->authSesiModel->getSesiNonAktif($userId, $sesiId);
-        $authSesiModel = model('Auth/AuthSesiModel');
+        $authSesiModel = $this->authSesiModel;
 
         try {
             foreach ($sesiNonAktif as $sesi) {
@@ -275,10 +282,6 @@ class Profil extends BaseController
 
     public function updateInfo()
     {
-        // if (!auth()->user()->can('klien.edit')) {
-        //     return $this->response->setJSON(['success'  => false, 'messages' => 'Anda tidak memiliki izin untuk mengedit user.']);
-        // }
-
         $response = [];
         $idUser = $this->request->getPost('user_id');
         $idProfil = $this->request->getPost('profil_id');
@@ -295,7 +298,7 @@ class Profil extends BaseController
             'alamat' => $this->request->getPost('alamat')
         ];
 
-        $validasi = $this->userProfilModel->validationRules;
+        $validasi = $this->userProfilModel->validationRules();
         $data = $this->request->getPost(array_keys($validasi));
         // array_keys($validasi) => ['user_id', 'perusahaan', 'whatsapp', 'telegram', 'alamat']
 

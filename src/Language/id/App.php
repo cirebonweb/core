@@ -19,5 +19,6 @@ return [
     'update-error' => 'Data gagal diperbaharui!',
     'delete-success' => 'Data berhasil dihapus.',
     'delete-error' => 'Data gagal dihapus!',
+    'delete-disabled' => 'Fitur hapus data tidak tersedia',
     'invalid-data' => 'Data yang diterima server tidak valid!'
  ];

@@ -2,7 +2,28 @@
 
 Thank you for your interest in contributing to **cirebonweb/core**!
 
-This package is designed to support maintainers, interns, and developers working with CodeIgniter 4. It includes modular publishing commands, region-aware logic, and customizable admin panels using AdminLTE and Shield authentication.
+This package is designed to support maintainers, interns, and developers working with CodeIgniter 4. It includes modular publishing commands and customizable admin panels using AdminLTE and Shield authentication.
+
+---
+
+## 🗂️ Documentation map
+
+| Document | Audience | Contents |
+|---|---|---|
+| `README.md` | package consumer | Features, installation, usage |
+| `ABOUT.md` | anyone | Project story and design philosophy |
+| `COMMAND.md` | package consumer | Publish options per group + resulting file tree |
+| `ARSITEKTUR.md` | core maintainer | Design rules and publish policy — **main reference** |
+| `src/Dokumen/Konsep.md` | core maintainer | CORE module index and concept reference |
+| `src/Dokumen/modul-hak-akses.md` | core maintainer | Access-control module decisions and behavior |
+
+### Where does documentation belong?
+
+- General CORE concepts and module index → `src/Dokumen/Konsep.md`.
+- Detailed module decisions → a focused `src/Dokumen/modul-*.md` linked from `Konsep.md`.
+- Design rules or publish policy → `ARSITEKTUR.md`.
+- Publish flags, file trees, manual config → `COMMAND.md`.
+- Consumer-facing install steps → `README.md`.
 
 ---
 
@@ -33,6 +54,9 @@ You can contribute in many ways:
 - Prefer plain text documentation blocks for maintainers and interns
 - Avoid magic logic—make everything traceable and override-friendly
 - If adding new publishable resources, update `COMMAND.md` and `README.md`
+- If changing publish behaviour or design rules, update `ARSITEKTUR.md`
+- Core PHP comments are Bahasa Indonesia; repository documents (`*.md`) are English
+- Do not commit temporary or scratch files at the package root
 
 ---
 

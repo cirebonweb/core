@@ -3,7 +3,10 @@
   "description": "Core package for CodeIgniter 4 with Admin Dashboard",
   "license": "MIT",
   "type": "library",
-  "keywords": ["codeigniter", "codeigniter4"],
+  "keywords": [
+    "codeigniter",
+    "codeigniter4"
+  ],
   "authors": [
     {
       "name": "Mahmud",
@@ -12,11 +15,18 @@
     }
   ],
   "require": {
-    "php": "^8.1"
+    "php": "^8.2",
+    "codeigniter4/framework": "^4.7",
+    "codeigniter4/settings": "^2.2",
+    "codeigniter4/shield": "^1.4"
   },
+  "suggest": {},
   "minimum-stability": "stable",
   "prefer-stable": true,
   "autoload": {
+    "files": [
+      "src/Config/Events.php"
+    ],
     "psr-4": {
       "Cirebonweb\\": "src/"
     }

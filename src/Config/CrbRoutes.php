@@ -4,18 +4,51 @@ namespace Cirebonweb\Config;
 
 use CodeIgniter\Router\RouteCollection;
 
+/**
+ * Builder route milik core.
+ *
+ * Konvensi URL: semua halaman core berada di bawah `vendor/` dengan path DATAR
+ * (tidak bersarang), supaya lebih ringkas dan mudah dibaca:
+ *
+ *   vendor/user-list        vendor/setting-umum
+ *   vendor/user-login       vendor/setting-cache
+ *   vendor/log-email        vendor/setting-optimasi
+ *
+ * Endpoint AJAX memakai bentuk `<halaman>/<aksi>`, contoh
+ * `vendor/setting-umum/simpan-situs` atau `vendor/user-list/tabel`.
+ *
+ * Halaman milik project TIDAK memakai prefiks `vendor/`, sehingga dari URL
+ * saja sudah jelas mana core mana project.
+ *
+ * Contoh pendaftaran route dan filter APP ada di `src/Publish/Config/Routes.php`.
+ */
 class CrbRoutes
 {
     protected string $namespace = 'Cirebonweb\Controllers';
+
+    /**
+     * Prefiks URL untuk seluruh halaman bawaan core.
+     */
+    public const VENDOR = 'vendor';
+
     protected array $routes = [];
+    protected string $group = '';
 
     /**
      * Builder utama, mengisi daftar route secara singkat.
      */
     protected function set(string $group, array $routes): self
     {
+        $this->group = $group;
         $this->routes = $routes;
         return $this;
+    }
+
+    public function dropdown(): self
+    {
+        return $this->set('dropdown', [
+            ['get', 'dropdown/(:segment)', 'Dropdown::getList/$1']
+        ]);
     }
 
     public function profil(): self
@@ -33,98 +66,110 @@ class CrbRoutes
 
     public function statistik(): self
     {
+        $v = self::VENDOR;
+
         return $this->set('statistik', [
-            ['get', 'admin/statistik/user-list', 'Admin\Statistik::userList'],
-            ['get', 'admin/statistik/user-login', 'Admin\Statistik::userLogin'],
-            ['get', 'admin/statistik/log-email', 'Admin\Statistik::logEmail']
+            ['get', $v . '/statistik/user-list', 'Statistik::userList'],
+            ['get', $v . '/statistik/user-login', 'Statistik::userLogin'],
+            ['get', $v . '/statistik/log-email', 'Statistik::logEmail']
         ]);
     }
 
     public function userList(): self
     {
+        $u = self::VENDOR . '/user-list';
+
         return $this->set('userList', [
-            ['get',  'admin/user/user-list', 'Admin\User\UserList::index'],
-            ['post', 'admin/user/user-list/tabel', 'Admin\User\UserList::tabel'],
-            ['post', 'admin/user/user-list/get-id', 'Admin\User\UserList::getId'],
-            ['post', 'admin/user/user-list/simpan', 'Admin\User\UserList::simpan'],
-            ['post', 'admin/user/user-list/update', 'Admin\User\UserList::update'],
-            ['post', 'admin/user/user-list/update-grup', 'Admin\User\UserList::updateGrup'],
-            ['post', 'admin/user/user-list/update-aktif', 'Admin\User\UserList::updateAktif']
+            ['get',  $u, 'User\UserList::index'],
+            ['post', $u . '/tabel', 'User\UserList::tabel'],
+            ['get', $u . '/tabel', 'User\UserList::tabel'],
+            ['post', $u . '/get-id', 'User\UserList::getId'],
+            ['post', $u . '/simpan', 'User\UserList::simpan'],
+            ['post', $u . '/update', 'User\UserList::update'],
+            ['post', $u . '/update-grup', 'User\UserList::updateGrup'],
+            ['post', $u . '/update-status', 'User\UserList::updateStatus'],
         ]);
     }
 
     public function userLogin(): self
     {
+        $u = self::VENDOR . '/user-login';
+
         return $this->set('userLogin', [
-            ['get',  'admin/user/user-login', 'Admin\User\UserLogin::index'],
-            ['post', 'admin/user/user-login/tabel', 'Admin\User\UserLogin::tabel'],
-            ['post', 'admin/user/user-login/hapus', 'Admin\User\UserLogin::hapus'],
-            ['post', 'admin/user/user-login/reset', 'Admin\User\UserLogin::reset'],
-            ['post', 'admin/user/user-login/refresh', 'Admin\User\UserLogin::refresh']
+            ['get',  $u, 'User\UserLogin::index'],
+            ['post', $u . '/tabel', 'User\UserLogin::tabel'],
+            ['post', $u . '/hapus', 'User\UserLogin::hapus'],
+            ['post', $u . '/reset', 'User\UserLogin::reset'],
+            ['post', $u . '/refresh', 'User\UserLogin::refresh'],
         ]);
     }
 
     public function settingUmum(): self
     {
+        $u = self::VENDOR . '/setting-umum';
+
         return $this->set('settingUmum', [
-            ['get',  'admin/setting', 'Admin\Setting\Umum::index'],
-            ['get',  'admin/setting/umum', 'Admin\Setting\Umum::index'],
-            ['post', 'admin/setting/umum/simpan-sistem', 'Admin\Setting\Umum::simpanSistem'],
-            ['post', 'admin/setting/umum/simpan-situs', 'Admin\Setting\Umum::simpanSitus'],
-            ['post', 'admin/setting/umum/simpan-smtp', 'Admin\Setting\Umum::simpanSmtp'],
-            ['post', 'admin/setting/umum/tes-smtp', 'Admin\Setting\Umum::tesSmtp'],
-            ['post', 'admin/setting/umum/simpan-recaptcha', 'Admin\Setting\Umum::simpanRecaptcha'],
-            ['post', 'admin/setting/umum/simpan-logo-warna', 'Admin\Setting\UmumLogo::simpanLogoWarna'],
-            ['post', 'admin/setting/umum/simpan-logo-putih', 'Admin\Setting\UmumLogo::simpanLogoPutih'],
-            ['post', 'admin/setting/umum/simpan-logo-ikon', 'Admin\Setting\UmumLogo::simpanLogoIkon'],
-            ['post', 'admin/setting/umum/simpan-logo-ikon32', 'Admin\Setting\UmumLogo::simpanLogoIkon32'],
-            ['post', 'admin/setting/umum/simpan-logo-ikon180', 'Admin\Setting\UmumLogo::simpanLogoIkon180'],
-            ['post', 'admin/setting/umum/simpan-logo-ikon192', 'Admin\Setting\UmumLogo::simpanLogoIkon192']
+            ['get',  self::VENDOR . '/setting', 'Setting\Umum::index'],
+            ['get',  $u, 'Setting\Umum::index'],
+            ['post', $u . '/simpan-sistem', 'Setting\Umum::simpanSistem'],
+            ['post', $u . '/simpan-situs', 'Setting\Umum::simpanSitus'],
+            ['post', $u . '/simpan-smtp', 'Setting\Umum::simpanSmtp'],
+            ['post', $u . '/tes-smtp', 'Setting\Umum::tesSmtp'],
+            ['post', $u . '/simpan-logo-warna', 'Setting\UmumLogo::simpanLogoWarna'],
+            ['post', $u . '/simpan-logo-putih', 'Setting\UmumLogo::simpanLogoPutih'],
+            ['post', $u . '/simpan-logo-ikon', 'Setting\UmumLogo::simpanLogoIkon'],
+            ['post', $u . '/simpan-logo-ikon32', 'Setting\UmumLogo::simpanLogoIkon32'],
+            ['post', $u . '/simpan-logo-ikon180', 'Setting\UmumLogo::simpanLogoIkon180'],
+            ['post', $u . '/simpan-logo-ikon192', 'Setting\UmumLogo::simpanLogoIkon192'],
         ]);
     }
 
     public function settingCache(): self
     {
+        $u = self::VENDOR . '/setting-cache';
+
         return $this->set('settingCache', [
-            ['get',  'admin/setting/cache', 'Admin\Setting\Cache::index'],
-            ['post', 'admin/setting/cache/tabel', 'Admin\Setting\Cache::tabel'],
-            ['post', 'admin/setting/cache/simpan', 'Admin\Setting\Cache::simpan'],
-            ['post', 'admin/setting/cache/hapus', 'Admin\Setting\Cache::hapus'],
-            ['post', 'admin/setting/cache/hapus-expired', 'Admin\Setting\Cache::hapusExpired']
+            ['get',  $u, 'Setting\Cache::index'],
+            ['post', $u . '/tabel', 'Setting\Cache::tabel'],
+            ['post', $u . '/simpan', 'Setting\Cache::simpan'],
+            ['post', $u . '/hapus', 'Setting\Cache::hapus'],
+            ['post', $u . '/hapus-expired', 'Setting\Cache::hapusExpired'],
         ]);
     }
 
     public function settingOptimasi(): self
     {
+        $u = self::VENDOR . '/setting-optimasi';
+
         return $this->set('settingOptimasi', [
-            ['get',  'admin/setting/optimasi', 'Admin\Setting\Optimasi::index'],
-            ['get', 'admin/setting/optimasi/get-info', 'Admin\Setting\Optimasi::getInfo'],
-            ['post', 'admin/setting/optimasi/hapus-log', 'Admin\Setting\Optimasi::hapusLog'],
-            ['post', 'admin/setting/optimasi/hapus-debug', 'Admin\Setting\Optimasi::hapusDebug'],
-            ['post', 'admin/setting/optimasi/db-optimasi', 'Admin\Setting\Optimasi::dbOptimasi'],
-            ['post', 'admin/setting/optimasi/db-tabel', 'Admin\Setting\Optimasi::dbTabel'],
-            ['post', 'admin/setting/optimasi/db-analisis', 'Admin\Setting\Optimasi::dbAnalisis'],
-            ['post', 'admin/setting/optimasi/db-refresh', 'Admin\Setting\Optimasi::dbRefresh']
+            ['get',  $u, 'Setting\Optimasi::index'],
+            ['get',  $u . '/get-info', 'Setting\Optimasi::getInfo'],
+            ['post', $u . '/hapus-log', 'Setting\Optimasi::hapusLog'],
+            ['post', $u . '/hapus-debug', 'Setting\Optimasi::hapusDebug'],
+            ['post', $u . '/db-optimasi', 'Setting\Optimasi::dbOptimasi'],
+            ['post', $u . '/db-tabel', 'Setting\Optimasi::dbTabel'],
+            ['post', $u . '/db-analisis', 'Setting\Optimasi::dbAnalisis'],
+            ['post', $u . '/db-refresh', 'Setting\Optimasi::dbRefresh'],
         ]);
     }
 
     public function log(): self
     {
+        $u = self::VENDOR . '/log-email';
+
         return $this->set('log', [
-            ['get',  'admin/log', 'Admin\Log\Email::index'],
-            ['get',  'admin/log/email', 'Admin\Log\Email::index'],
-            ['post', 'admin/log/email/tabel', 'Admin\Log\Email::tabel'],
-            ['post', 'admin/log/email/hapus', 'Admin\Log\Email::hapus'],
-            ['post', 'admin/log/email/reset', 'Admin\Log\Email::reset'],
-            ['post', 'admin/log/email/refresh', 'Admin\Log\Email::refresh'],
+            ['get',  self::VENDOR . '/log', 'Log\Email::index'],
+            ['get',  $u, 'Log\Email::index'],
+            ['post', $u . '/tabel', 'Log\Email::tabel'],
+            ['post', $u . '/hapus', 'Log\Email::hapus'],
+            ['post', $u . '/reset', 'Log\Email::reset'],
+            ['post', $u . '/refresh', 'Log\Email::refresh'],
         ]);
     }
 
     public function auth(): self
     {
         return $this->set('auth', [
-            ['get',  'login', 'Auth\Login::loginView', ['as' => 'login']],
-            ['post', 'login', 'Auth\Login::loginAction'],
             ['get',  'magic-link', 'Auth\MagicLink::loginView'],
             ['post', 'magic-link', 'Auth\MagicLink::loginAction'],
             ['get',  'verify-magic-link', 'Auth\MagicLink::verify']
@@ -139,8 +184,8 @@ class CrbRoutes
         $options = array_merge(['namespace' => $this->namespace], $options);
 
         $routes->group('', $options, function ($routes) {
-            foreach ($this->routes as [$method, $uri, $handler]) {
-                $routes->{$method}($uri, $handler);
+            foreach ($this->routes as $route) {
+                $routes->{$route[0]}($route[1], $route[2]);
             }
         });
     }

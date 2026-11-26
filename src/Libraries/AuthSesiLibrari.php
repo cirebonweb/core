@@ -2,6 +2,8 @@
 
 namespace Cirebonweb\Libraries;
 
+use Cirebonweb\Models\AuthSesiModel;
+use CodeIgniter\I18n\Time;
 use Config\Services;
 
 class AuthSesiLibrari
@@ -48,11 +50,13 @@ class AuthSesiLibrari
         $data = array_merge([
             'user_id'     => auth()->id(),
             'remember_id' => $rememberId,
-            'dibuat'      => date('Y-m-d H:i:s')
+            'dibuat'      => Time::now(config('App')->appTimezone)->toDateTimeString()
         ], $deviceInfo);
 
         try {
-            model('Auth/AuthSesiModel')->update($sesiId, $data);
+            if (! (new AuthSesiModel())->update($sesiId, $data)) {
+                log_message('error', 'Gagal menyimpan metadata sesi perangkat: ' . $sesiId);
+            }
             // $affected = model('Auth/AuthSesiModel')->affectedRows(); // atau $model->builder()->affectedRows()
             // log_message('debug', "Update auth_sesi sukses untuk sesi {$sesiId}, affected rows: {$affected}, remember_id: {$rememberId}");
         } catch (\Throwable $e) {

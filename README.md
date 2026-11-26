@@ -1,33 +1,49 @@
 ## Cirebonweb CI4+ All-in-One Admin Dashboard
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+
+## [Releases](https://github.com/cirebonweb/core/releases)
+
+Versi CORE saat ini: **1.0.3**. APP baru dapat memasang rilis stabil terbaru dengan
+`composer require cirebonweb/core`.
+
 [![About](https://img.shields.io/badge/About-Project%20Story-blue)](ABOUT.md)
 [![Contributing](https://img.shields.io/badge/Contributing-Guide-orange)](CONTRIBUTING.md)
 [![Changelog](https://img.shields.io/badge/Changelog-Version%20History-yellow)](https://github.com/cirebonweb/core/tags)
 [![Commands](https://img.shields.io/badge/Commands-Publish%20Options-purple)](COMMAND.md)
 
-Cirebonweb CI4+ is a fully integrated admin dashboard built on the latest version of CodeIgniter 4. It is ready to use out of the box — simply install via Composer, publish the resources, and all core features are instantly available, including login tracking, email logging, cache control, and system configuration.
+Cirebonweb CI4+ is an admin dashboard package built on CodeIgniter 4. Install
+the package and publish its bootstrap resources with `php spark
+cirebonweb:publish --all` to add the CORE configuration, starter routes, and
+example home page to a new APP.
 
-No manual setup required. No need to install modules one by one. Every page, helper, and configuration is pre-integrated and immediately operational, streamlining development and deployment for maintainers and teams.
+After publishing, set environment-specific APP values such as the database
+connection, and copy the maintained `public/plugin/` and `public/vendor/`
+assets as described below. CORE features themselves remain in the package and
+are loaded directly by the APP.
 
 Designed for maintainers, interns, and scalable systems. Built with clarity, auditability, and frontend control in mind.
 A modular, production-ready admin dashboard built on **CodeIgniter 4+** and **AdminLTE 3.2**. Includes:
 
 - Frontend configuration via **CI4 Settings**
-- Login tracking with **Device and location detection**
-- Email delivery with **HTML templates**
-- Cache management with **Custom helpers**
+- Login history with **device detection** (parsed from Shield `auth_logins.user_agent`
+  at read time via `crb_device` helper + `device_<md5>` cache — no GeoIP / no location tracking)
+- Email delivery with **HTML templates** + delivery log (`log_email`)
+- Cache management with **custom helpers** (`crb_cache.json` runtime + `Config\Crb` default)
+- Active session tracking (`auth_sesi`, inspired by Laravel Jetstream)
 
 ## ✨ Features
 
 ### 🖥️ Frontend Pages
 
-- 📸 Profile photo upload with client-side compression using Pica
-- 🔐 Active device session tracking (inspired by Laravel Jetstream)
-- 📊 Data statistics:
-  - User list
-  - Login activity
-  - Email log
+- 📸 Profile photo upload with client-side compression using Pica (table `user_profil`)
+- 🔐 Active device session tracking, inspired by Laravel Jetstream (table `auth_sesi`)
+  - Session activity and expiry use the database `timestamp`; `dibuat` is for display in the APP timezone.
+  - Session expiry is 2 hours. `regenerateDestroy = false` is retained for the production trial.
+- 📊 Data statistics (AJAX `vendor/statistik/*`, cached):
+  - User list (`statistik_user_list`)
+  - Login activity (`statistik_user_login`, source: Shield `auth_logins`)
+  - Email log (`statistik_log_email`)
 - ⚙️ Settings panel:
   - General (system, site, logo, SMTP, Recaptcha)
   - Cache (duration, datatables cache, file deletion)
@@ -42,92 +58,95 @@ A modular, production-ready admin dashboard built on **CodeIgniter 4+** and **Ad
 - 🧪 HTML minification (auto-enabled in production)
 - 📧 Email library with HTML template support and delivery logging
 - 🗂️ Cache helper for duration control and file management
-- 🌍 GeoIP2 integration with location detection (not include GeoLite2-City)
 - 🛡️ Shield authentication with login error tracking
 - ⚙️ CI4 Settings module for dynamic configuration
 
 ### 🛠️ System Stack
 
-- ✅ CodeIgniter 4.x (latest version)
+- ✅ CodeIgniter Framework `^4.7`
+- ✅ CodeIgniter Shield `^1.4`
+- ✅ CodeIgniter Settings `^2.2`
 - 🎨 AdminLTE 3.2 dashboard template
-- 🐘 PHP 8.1+ compatible
+- 🐘 PHP `^8.2`
 
 ## 🚀 Getting Started Installation
 
-This package requires the following core dependencies:
+This package requires the following core dependencies (see `composer.json`):
 
-1. codeigniter4/framework
+1. create a CodeIgniter APP
 ```bash
 composer create-project codeigniter4/appstarter project-root
 ```
 
-2. codeigniter4/shield and codeigniter4/settings
+2. install CORE and its Composer dependencies
 ```bash
-composer require codeigniter4/shield
-php spark shield:setup
-```
-
-3. geoip2/geoip2
-```bash
-composer require geoip2/geoip2
-```
-
-4. cirebonweb/core
-```bash
+cd project-root
 composer require cirebonweb/core
 ```
 
-5. publish project-root
+3. initialize Shield
+```bash
+php spark shield:setup
+```
+
+4. publish CORE resources
 * please read [publish options](COMMAND.md) before you execute this command
 ```bash
 php spark cirebonweb:publish --all
 ```
 
-6. configure .env
+5. copy maintained assets manually
+* `public/plugin/` and `public/vendor/` are **not** published by design — they are
+  maintained assets owned by the core package. Copy them once from the package:
 ```bash
-# CI_ENVIRONMENT = production
-CI_ENVIRONMENT = development
-
-app.baseURL = 'http://localhost:8080/'
-
-database.default.hostname = localhost
-database.default.database = project_root
-database.default.username = root
-database.default.password = 
-database.default.DBDriver = MySQLi
-# database.default.DBPrefix =
-database.default.port = 3306
-
-encryption.key = 'aBigSecretKeyOfAtLeast32Characters!'
+cp -r vendor/cirebonweb/core/src/Publish/Public/plugin public/plugin
+cp -r vendor/cirebonweb/core/src/Publish/Public/vendor public/vendor
 ```
+* skip this step and every page still returns 200, but without styling
+  (`adminlte.min.css`, `core.min.js`, `plugin/*` all 404)
 
-7. database migration
-* don't forget to configure env before executing this command
+6. run database migrations
+* ensure the APP environment already has valid database settings before migration
 ```bash
 php spark migrate --all
 ```
+* the package ships `HapusTabelUserLogin` only to clean up a leftover `user_login`
+  table from older versions — it is harmless on a fresh install
 
-8. run seeder
+7. run seeders if needed
+* seeders are examples provided by CORE and are not published by the publish
+  command. Run them explicitly by their fully qualified class name if needed:
 ```bash
-php spark db:seed SettingsSeeder
-php spark db:seed UserSeeder
+php spark db:seed 'Cirebonweb\Database\Seeds\SettingsSeeder'
+php spark db:seed 'Cirebonweb\Database\Seeds\UserSeeder'
 ```
+* `UserSeeder` creates sample accounts. Review the seeder and change or remove
+  sample credentials before using it in production.
 
-9. run project
+8. run the project
 ```bash
 php spark serve
 ```
 
-### ⚠️ geoip2 feature requirements
-To enable location detection, you must manually download and configure the GeoLite2 database:
-- Download: Create a free account at MaxMind and download the `GeoLite2-City.mmdb` file.
-- Placement: Place the downloaded file in a secure, non-public directory within your CodeIgniter project (e.g., writable/uploads/).
-- Configuration: Adjust your CodeIgniter configuration file to point to the correct database path.
-
-Note: The command above installs the latest compatible stable version. If you require a specific version, ensure your project's composer.json file explicitly requires geoip2/geoip2:^3.2. Failure to complete both steps will result in fatal errors when using GeoIP features.
+> **Catatan login history:** riwayat login dibaca langsung dari tabel bawaan Shield
+> `auth_logins`. Kolom perangkat / OS / browser diturunkan saat pembacaan dengan
+> mem-parse `auth_logins.user_agent` (helper `crb_device`). Tabel `user_login`
+> milik core sudah dibuang via migrasi `HapusTabelUserLogin` — tidak ada lagi
+> pelacakan lokasi (negara / wilayah / distrik / zona waktu / ISP).
 
 ## 📄 License
 This project is licensed under the MIT License.
+
+## 🗂️ Documentation map
+
+| Document | Audience | Contents |
+|---|---|---|
+| `README.md` (this file) | package consumer | Features, installation, usage |
+| `ABOUT.md` | anyone | Project story and design philosophy |
+| `COMMAND.md` | package consumer | Publish options per group + resulting file tree |
+| `ARSITEKTUR.md` | core maintainer | Design rules and publish policy — **main reference** |
+| `src/Dokumen/Konsep.md` | core maintainer | CORE module index and concept reference |
+| `src/Dokumen/modul-hak-akses.md` | core maintainer | Access-control module decisions and behavior |
 
 ## 🤝 Contributing
 Documentation within the source code (PHPDoc-style `/** ... */`) is written in Bahasa Indonesia to support local maintainers and interns. If you're interested in contributing—whether by improving documentation, translating, or extending features—feel free to join and collaborate.

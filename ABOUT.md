@@ -9,10 +9,12 @@ Over time, I realized that this structure could also be useful for others—espe
 - This is not a global framework. It’s a personal vendor structure tailored for maintainability across multiple projects.
 - Some views are not published to the root project by default. These are core features (like login dashboards) meant to be maintained centrally and published selectively.
 - The term “dashboard” here refers to ready-to-use pages with built-in features like login tracking, statistics, data tables, and reset actions—not just a layout shell.
+- Privacy by default: the core does not track user location. Login history reads CodeIgniter Shield’s built-in `auth_logins` table and derives device/OS/browser from the user agent string—no GeoIP database, no third-party lookup service.
 
 ## ⚠️ Notes for Users
 
 - The structure may look unconventional, but it follows CI4 standards and works reliably.
+- `public/plugin/` and `public/vendor/` are intentionally excluded from the publish command because they are maintained assets owned by this package. Copy them once from `vendor/cirebonweb/core/src/Publish/Public/` after publishing, or pages will load without styling.
 - If you find the layout unfamiliar, remember: this started as a personal tool, not a global solution.
 - Documentation may look polished, but I’m still learning—transitioning from CMS WordPress to MVC frameworks has been a journey, and this package reflects that growth.
 

@@ -1,39 +1,68 @@
 <?php
 
-use Config\Services;
+use CodeIgniter\HTTP\UserAgent;
 
 if (!function_exists('getDeviceData')) {
     /**
-     * Mendapatkan data perangkat dari User Agent dengan caching
-     * @return array Data perangkat seperti device, os, browser, brand, model, dll
+     * Parse data perangkat dari sebuah string User-Agent.
+     *
+     * Dipanggil tanpa argumen untuk memakai User-Agent request berjalan,
+     * atau dengan argumen untuk membaca User-Agent tersimpan
+     * (mis. `auth_logins.user_agent`). Tidak ada tulisan data saat login —
+     * seluruh pemrosesan terjadi saat pembacaan.
+     *
+     * Hasil di-cache per string UA (key `device_<md5>`), sehingga UA yang sama
+     * tidak diparsing ulang walau diminta berkali-kali.
+     *
+     * @return array{device: string, bit: string, os: string, browser: string,
+     *               browserv: string, brand: string, model: string}
      */
-    function getDeviceData(): array
+    function getDeviceData(?string $uaString = null): array
     {
-        if (auth()->loggedIn()) {
-            $cacheKey = 'device_' . auth()->id() . '_' . date('His');
-        } else {
-            $cacheKey = 'device_' . base_convert((int)(microtime(true) * 1000000), 10, 36);
-        }
+        $raw = trim($uaString ?? (string) service('superglobals')->server('HTTP_USER_AGENT'));
 
-        $cached = cache($cacheKey);
+        $cacheKey = 'device_' . md5($raw);
+        $cached   = cache($cacheKey);
         if ($cached !== null) {
             return $cached;
         }
 
-        $ua = Services::request()->getUserAgent();
-        $uaString = strtolower((string) $ua);
+        $data = parseDeviceData($raw);
+        cache()->save($cacheKey, $data, service('cacheTtl')->ttl('cache_device'));
 
-        // 3️⃣ Deteksi bit OS
-        if (stripos($uaString, 'x64') !== false || stripos($uaString, 'win64') !== false || stripos($uaString, 'amd64') !== false) {
+        return $data;
+    }
+}
+
+if (!function_exists('parseDeviceData')) {
+    /**
+     * Parsing mentah tanpa cache. Satu instance UserAgent dipakai ulang untuk
+     * seluruh baris, sehingga biaya per baris tetap kecil.
+     */
+    function parseDeviceData(string $uaString): array
+    {
+        static $ua = null;
+        if ($ua === null) {
+            $ua = new UserAgent();
+        }
+        // parse() me-reset browser/robot/mobile lalu meng-compile ulang,
+        // jadi aman dipakai ulang untuk string yang berbeda-beda.
+        $ua->parse($uaString);
+
+        $s = strtolower($uaString);
+
+        // Deteksi bit OS
+        $bit = 'Null';
+        if (stripos($s, 'x64') !== false || stripos($s, 'win64') !== false || stripos($s, 'amd64') !== false) {
             $bit = '64-bit';
-        } elseif (stripos($uaString, 'x86') !== false || stripos($uaString, 'i686') !== false) {
+        } elseif (stripos($s, 'x86') !== false || stripos($s, 'i686') !== false) {
             $bit = '32-bit';
         }
 
-        // 4️⃣ Deteksi perangkat
+        // Deteksi tipe perangkat
         if ($ua->isRobot()) {
             $device = 'Robot';
-        } elseif (isTablet($uaString)) {
+        } elseif (isTablet($s)) {
             $device = 'Tablet';
         } elseif ($ua->isMobile()) {
             $device = 'Mobile';
@@ -41,36 +70,160 @@ if (!function_exists('getDeviceData')) {
             $device = 'Desktop';
         }
 
-        // 5️⃣ Parsing manual untuk Mobile/Tablet
+        // OS & browser diambil dari string yang diberikan, bukan dari request berjalan
+        $os      = $uaString === '' ? 'Tidak Diketahui' : getOperatingSystem($uaString, (string) $ua->getPlatform());
+        $browser = getBrowserName($ua);
+
         if ($ua->isMobile()) {
-            $os      = getMobileOS($uaString);
-            $browser = getMobileBrowser($uaString);
-            $brand   = getMobileBrand($uaString);
-            $model   = getMobileModel($uaString);
+            $brand = getMobileBrand($s);
+            $model = getMobileModel($s);
         } else {
-            $os      = trim($ua->getPlatform());
-            $browser = trim($ua->getBrowser());
-            $brand   = 'Umum';
-            $model   = 'Umum';
+            $brand = 'Umum';
+            $model = 'Umum';
         }
 
-        $data = [
-            'device'   => $device ?? 'Null',
-            'bit'      => $bit ?? 'Null',
-            'os'       => $os ?? 'Null',
-            'browser'  => $browser ?? 'Null',
-            'browserv' => trim($ua->getVersion()) ?? 'Null',
-            'brand'    => $brand ?? 'Null',
-            'model'    => $model ?? 'Null'
+        return [
+            'device'   => $device,
+            'bit'      => $bit,
+            'os'       => $os,
+            'browser'  => $browser,
+            'browserv' => trim((string) $ua->getVersion()),
+            'brand'    => $brand,
+            'model'    => $model,
+        ];
+    }
+}
+
+if (!function_exists('getBrowserName')) {
+    /**
+     * Nama browser beserta versinya, contoh: "Firefox 143", "Chrome 140".
+     *
+     * CI4 jatuh ke token generik "Mozilla" untuk User-Agent milik klien non-browser
+     * (PowerShell, curl, dsb). Token itu diangkat ke nama klien sebenarnya agar
+     * riwayat login tetap informatif.
+     */
+    function getBrowserName(UserAgent $ua): string
+    {
+        if ($ua->isRobot()) {
+            $robot = trim((string) $ua->getRobot());
+
+            return $robot !== '' ? $robot : 'Tidak Diketahui';
+        }
+
+        $name = trim((string) $ua->getBrowser());
+        $ver  = trim((string) $ua->getVersion());
+
+        if ($name === '' || $name === 'Mozilla') {
+            $spesifik = detectNonBrowserClient($ua->getAgentString());
+            if ($spesifik !== null) {
+                return $spesifik;
+            }
+        }
+
+        if ($name === '') {
+            return 'Tidak Diketahui';
+        }
+
+        return $ver !== '' ? $name . ' ' . $ver : $name;
+    }
+}
+
+if (!function_exists('detectNonBrowserClient')) {
+    /**
+     * Deteksi klien non-browser (script, API client, automation) dari string UA.
+     * Mengembalikan null bila bukan klien yang dikenal.
+     */
+    function detectNonBrowserClient(string $ua): ?string
+    {
+        $pola = [
+            'WindowsPowerShell/' => 'PowerShell',
+            'PowerShell/'        => 'PowerShell',
+            'PostmanRuntime/'    => 'Postman',
+            'python-requests/'   => 'Python Requests',
+            'Python-urllib/'     => 'Python urllib',
+            'Go-http-client/'    => 'Go HTTP',
+            'libwww-perl/'       => 'libwww-perl',
+            'axios/'             => 'Axios',
+            'node-fetch'         => 'node-fetch',
+            'okhttp/'            => 'OkHttp',
+            'Dalvik/'            => 'Android HTTP',
+            'WinHttp'            => 'WinHTTP',
+            'Google-HTTP-Java'   => 'Google HTTP',
+            'Guzzle'             => 'Guzzle',
+            'Java/'              => 'Java',
+            'Dart/'              => 'Dart',
+            'curl/'              => 'curl',
+            'Wget/'              => 'Wget',
         ];
 
-        // Simpan ke cache CI4
-        helper('crb_cache');
-        cache()->save($cacheKey, $data, getDurasiCache('cache_device'));
+        foreach ($pola as $token => $nama) {
+            $pos = stripos($ua, $token);
+            if ($pos === false) {
+                continue;
+            }
 
-        return $data;
+            $sisa = substr($ua, $pos + strlen($token));
+            $ver  = preg_match('/^([0-9][0-9.]*)/', $sisa, $m) === 1 ? $m[1] : '';
+
+            return $ver !== '' ? $nama . ' ' . $ver : $nama;
+        }
+
+        return null;
     }
+}
 
+if (!function_exists('getOperatingSystem')) {
+    /**
+     * Sistem operasi beserta versinya hanya bila pasti.
+     *
+     * Catatan: Windows 10 dan Windows 11 sama-sama melaporkan `Windows NT 10.0`,
+     * jadi versinya sengaja TIDAK dikarang — cukup ditampilkan "Windows".
+     */
+    function getOperatingSystem(string $uaString, string $platform = ''): string
+    {
+        $s = strtolower($uaString);
+
+        if (preg_match('/android\s+([0-9]+)/i', $uaString, $m) === 1) {
+            return 'Android ' . $m[1];
+        }
+        if (preg_match('/(?:iphone|ipad|ipod).*?os\s+([0-9_]+)/i', $uaString, $m) === 1) {
+            return 'iOS ' . str_replace('_', '.', $m[1]);
+        }
+        if (strpos($s, 'windows phone') !== false) {
+            return 'Windows Phone';
+        }
+        if (strpos($s, 'windows') !== false) {
+            if (preg_match('/windows nt\s+([0-9.]+)/i', $uaString, $m) === 1) {
+                $versi = [
+                    '5.1' => 'Windows XP',
+                    '6.0' => 'Windows Vista',
+                    '6.1' => 'Windows 7',
+                    '6.2' => 'Windows 8',
+                    '6.3' => 'Windows 8.1',
+                ];
+
+                return $versi[$m[1]] ?? 'Windows';
+            }
+
+            return 'Windows';
+        }
+        if (preg_match('/mac os x\s+([0-9_]+)/i', $uaString, $m) === 1) {
+            return 'macOS ' . str_replace('_', '.', $m[1]);
+        }
+        if (strpos($s, 'cros') !== false) {
+            return 'Chrome OS';
+        }
+        if (strpos($s, 'linux') !== false || strpos($s, 'x11') !== false) {
+            return 'Linux';
+        }
+
+        return $platform !== '' && $platform !== 'Unknown Platform'
+            ? $platform
+            : 'Tidak Diketahui';
+    }
+}
+
+if (!function_exists('isTablet')) {
     function isTablet(string $uaString): bool
     {
         return (
@@ -81,7 +234,9 @@ if (!function_exists('getDeviceData')) {
             strpos($uaString, 'kindle') !== false
         );
     }
+}
 
+if (!function_exists('getMobileOS')) {
     function getMobileOS(string $ua): string
     {
         if (strpos($ua, 'android') !== false) return 'Android';
@@ -90,7 +245,9 @@ if (!function_exists('getDeviceData')) {
         if (strpos($ua, 'windows phone') !== false) return 'Windows Phone';
         return 'Tidak Diketahui';
     }
+}
 
+if (!function_exists('getMobileBrowser')) {
     function getMobileBrowser(string $ua): string
     {
         if (strpos($ua, 'chrome') !== false) return 'Chrome Mobile';
@@ -99,7 +256,9 @@ if (!function_exists('getDeviceData')) {
         if (strpos($ua, 'opera') !== false || strpos($ua, 'opr') !== false) return 'Opera Mobile';
         return 'Tidak Diketahui';
     }
+}
 
+if (!function_exists('getMobileBrand')) {
     function getMobileBrand(string $ua): string
     {
         $ua = strtolower($ua);
@@ -139,7 +298,9 @@ if (!function_exists('getDeviceData')) {
 
         return 'Tidak Diketahui';
     }
+}
 
+if (!function_exists('getMobileModel')) {
     function getMobileModel(string $ua): string
     {
         // Contoh: cari pola SM-G991B atau iPhone13,3

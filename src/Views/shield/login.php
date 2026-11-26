@@ -38,8 +38,6 @@
                     </div>
 
                     <div class="row">
-                        <?= $this->include('Cirebonweb\shield\recaptcha') ?>
-
                         <?php if (setting('App.authRemembering') === "true") : ?>
                             <div class="col-8">
                                 <div class="icheck-primary">
@@ -76,7 +74,6 @@
     <script src="<?= base_url('plugin/jquery/jquery.validate.min.js') ?>"></script>
     <script src="<?= base_url('plugin/jquery/jquery.validate_id.min.js') ?>"></script>
     <script src="<?= base_url('plugin/jquery/additional-methods.min.js') ?>"></script>
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <script>
         function cekpwd() {
             let input = $(".passwd").get(0);
@@ -88,18 +85,6 @@
                 input.type = "password";
             }
         }
-
-        <?php if (setting('App.gRecaptcha') === "true") : ?>
-        $(function() {
-            $('#loginForm').on('submit', function(e) {
-                var response = grecaptcha.getResponse();
-                if (response.length === 0) {
-                    e.preventDefault(); // hentikan submit
-                    alert('Silakan centang reCAPTCHA terlebih dahulu.');
-                }
-            });
-        });
-        <?php endif ?>
 
         function IsEmail(email) {
             const regex = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;

@@ -4,6 +4,7 @@ namespace Cirebonweb\Libraries;
 
 use CodeIgniter\Database\BaseBuilder;
 use CodeIgniter\HTTP\IncomingRequest;
+use Closure;
 
 class TabelLibrari
 {
@@ -11,8 +12,8 @@ class TabelLibrari
     protected IncomingRequest $request;
     protected array $searchable = [];
     protected array $orderable = [];
-    protected ?array $defaultOrder = null; // null = no forced default
-    protected $rowCallback = null;
+    protected ?array $defaultOrder = null;
+    protected ?Closure $rowCallback = null;
 
     public function __construct(BaseBuilder $builder, IncomingRequest $request)
     {
@@ -26,16 +27,15 @@ class TabelLibrari
         return $this;
     }
 
+    /**
+     * Lists map sequentially to request columns marked orderable, or may use explicit DataTables indexes.
+     */
     public function setOrderable(array $cols): self
     {
         $this->orderable = $cols;
         return $this;
     }
 
-    /**
-     * Set default order. Contoh: ['a.id' => 'asc'] atau ['a.username' => 'desc']
-     * Jika null, library TIDAK akan memaksakan order saat request tidak memberikan order.
-     */
     public function setDefaultOrder(?array $order): self
     {
         $this->defaultOrder = $order;
@@ -44,7 +44,7 @@ class TabelLibrari
 
     public function setRowCallback(callable $cb): self
     {
-        $this->rowCallback = $cb;
+        $this->rowCallback = Closure::fromCallable($cb);
         return $this;
     }
 
@@ -53,78 +53,94 @@ class TabelLibrari
         $post = $this->request->getPost();
         $draw = intval($post['draw'] ?? 1);
         $start = intval($post['start'] ?? 0);
-        $length = intval($post['length'] ?? 10);
-
+        $length = intval($post['length'] ?? config('Crb')->crud['length']);
         $searchValue = $post['search']['value'] ?? null;
 
-        // === PENCARIAN GLOBAL: hanya pada kolom yang ada di $this->searchable
+        // === 1. HITUNG TOTAL RECORDS SEBELUM FILTER SEARCH GLOBAL ===
+        // Mengkloning builder dasar (yang sudah membawa where/join filter kustom dari controller)
+        $totalBuilder = clone $this->builder;
+        $recordsTotal = $totalBuilder->countAllResults(false);
+
+        // === 2. PENCARIAN GLOBAL ===
         if ($searchValue && !empty($this->searchable)) {
+            $keyword  = $this->escapeLike($searchValue);
             $this->builder->groupStart();
             foreach ($this->searchable as $col) {
-                $this->builder->orLike($col, $searchValue);
+                $this->builder->orLike($col, $keyword);
             }
             $this->builder->groupEnd();
         }
 
-        // === ORDERING ===
+        // === 3. HITUNG FILTERED RECORDS SETELAH SEARCH GLOBAL ===
+        $filteredBuilder = clone $this->builder;
+        $recordsFiltered = $filteredBuilder->countAllResults(false);
+
+        // === 4. ORDERING ===
         $orderColIndex = $post['order'][0]['column'] ?? null;
         $orderDir = strtolower($post['order'][0]['dir'] ?? 'asc');
         $appliedOrder = false;
 
-        if ($orderColIndex !== null && isset($this->orderable[$orderColIndex])) {
-            // gunakan orderable yang diset controller (index => columnName)
-            $colName = $this->orderable[$orderColIndex];
-            if (in_array($orderDir, ['asc','desc'], true)) {
+        $orderableByIndex = $this->orderable;
+        if (array_is_list($this->orderable)) {
+            $sortableIndexes = [];
+            foreach ($post['columns'] ?? [] as $index => $column) {
+                if (is_array($column) && filter_var($column['orderable'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
+                    $sortableIndexes[] = (int) $index;
+                }
+            }
+
+            $orderableByIndex = [];
+            foreach ($this->orderable as $position => $column) {
+                if (! isset($sortableIndexes[$position])) {
+                    break;
+                }
+                $orderableByIndex[$sortableIndexes[$position]] = $column;
+            }
+        }
+
+        if ($orderColIndex !== null && isset($orderableByIndex[$orderColIndex])) {
+            $colName = $orderableByIndex[$orderColIndex];
+            if (in_array($orderDir, ['asc', 'desc'], true)) {
                 $this->builder->orderBy($colName, $orderDir);
                 $appliedOrder = true;
             }
         }
 
-        // jika client tidak kirim order yang valid, pakai defaultOrder bila diset
         if (!$appliedOrder && !empty($this->defaultOrder)) {
             foreach ($this->defaultOrder as $c => $d) {
                 $d = strtolower($d) === 'desc' ? 'desc' : 'asc';
                 $this->builder->orderBy($c, $d);
             }
-            $appliedOrder = true;
         }
 
-        // Jika tetap tidak ada order (tidak diinginkan), biarkan DB natural order (tidak meng-order)
-        // === HITUNG TOTAL & FILTERED ===
-        // gunakan clone builder untuk menghitung total tanpa limit
-        $countBuilder = clone $this->builder;
-        $recordsFiltered = $countBuilder->countAllResults(false);
+        // === 5. PAGINATION & AMBIL DATA ===
+        // Proteksi jika length bernilai -1 (artinya DataTables meminta 'All Data')
+        if ($length != -1) {
+            $this->builder->limit($length, $start);
+        }
 
-        // Untuk totalRecords sebaiknya menghitung berdasarkan base table tanpa filter:
-        // (Asumsi caller sudah memberikan builder dasar tanpa where filter global; jika tidak, adjust)
-        // Simpel: gunakan same builder sebelum pencarian/filter diterapkan jika perlu.
-        // Di sini kita tidak implementasikan counting perfect untuk semua kasus kompleks,
-        // caller dapat override bila butuh.
+        $rows = $this->builder->get()->getResult();
 
-        // === PAGINATION & AMBIL DATA ===
-        $query = $this->builder->limit($length, $start)->get();
-        $rows = $query->getResult();
-
-        // Jika rowCallback ada, proses tiap baris (controller mengembalikan array terurut sesuai <th>)
+        // === 6. PROSES CALLBACK ===
+        $data = [];
         if ($this->rowCallback) {
-            $processed = [];
             foreach ($rows as $r) {
-                $processed[] = call_user_func($this->rowCallback, $r);
+                $data[] = call_user_func($this->rowCallback, $r);
             }
-            $data = $processed;
         } else {
-            // default: kembalikan array of objects (atau array) sesuai kebutuhan DataTables
             $data = $rows;
         }
 
-        // catatan: recordsTotal bisa dihitung dari base table bila perlu; gunakan fallback:
-        $recordsTotal = $recordsFiltered;
-
         return [
-            'draw' => $draw,
-            'recordsTotal' => $recordsTotal,
+            'draw'            => $draw,
+            'recordsTotal'    => $recordsTotal,
             'recordsFiltered' => $recordsFiltered,
-            'data' => $data,
+            'data'            => $data,
         ];
+    }
+
+    protected function escapeLike(string $value): string
+    {
+        return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $value);
     }
 }

@@ -18,5 +18,6 @@ return [
     'update-error' => 'Update error!',
     'delete-success' => 'Successfully deleted',
     'delete-error' => 'Delete error!',
+    'delete-disabled' => 'The data deletion feature is not available.',
     'invalid-data' => 'The data received by the server is invalid!'
 ];
