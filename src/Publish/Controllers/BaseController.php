@@ -4,6 +4,8 @@ namespace App\Controllers;
 
 use CodeIgniter\Controller;
 use CodeIgniter\Database\ConnectionInterface;
+use CodeIgniter\HTTP\CLIRequest;
+use CodeIgniter\HTTP\IncomingRequest;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\Session\SessionInterface;
@@ -14,26 +16,31 @@ use RuntimeException;
 abstract class BaseController extends Controller
 {
     protected SessionInterface $session;
-    /**
-     * @var mixed $request
-     */
     protected $request;
     protected ValidationInterface $validation;
     protected ConnectionInterface $db;
 
     protected $helpers = ['url'];
 
+    // Kontrak CORE: jangan hapus atau ubah nama/properti ini.
+    // CrudTrait bergantung pada $modelClass untuk inisialisasi model dan
+    // $model untuk seluruh operasi CRUD.
+
     /**
-     * Kontrak CORE: jangan hapus atau ubah nama/properti ini.
-     * CrudTrait bergantung pada $modelClass untuk inisialisasi model dan
-     * $model untuk seluruh operasi CRUD.
+     * @var mixed $modelClass
      */
     protected $modelClass;
+
+    /**
+     * @var mixed $model
+     */
     protected $model;
 
     /**
      * Kontrak CORE: pertahankan inisialisasi properti di sini agar controller
      * CORE yang memakai CrudTrait memperoleh model, session, validation, dan DB.
+     * @param CLIRequest|IncomingRequest $request
+     * @return void
      */
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
     {
@@ -48,9 +55,8 @@ abstract class BaseController extends Controller
         }
     }
 
-    /**
-     * Kontrak CORE CrudTrait: jangan hapus atau ubah nama/signature method ini.
-     */
+    // Kontrak CORE CrudTrait: jangan hapus atau ubah nama/signature method dibawah ini.
+
     protected function crudModel()
     {
         if (! isset($this->model)) {
@@ -60,25 +66,16 @@ abstract class BaseController extends Controller
         return $this->model;
     }
 
-    /**
-     * Kontrak CORE CrudTrait: pertahankan nama dan signature method ini.
-     */
     protected function crudSearchable(): array
     {
         return property_exists($this, 'searchable') ? (array) $this->searchable : [];
     }
 
-    /**
-     * Kontrak CORE CrudTrait: pertahankan nama dan signature method ini.
-     */
     protected function crudOrderable(): array
     {
         return property_exists($this, 'orderable') ? (array) $this->orderable : [];
     }
 
-    /**
-     * Kontrak CORE CrudTrait: jangan hapus atau ubah nama/signature method ini.
-     */
     protected function ajax(): ?ResponseInterface
     {
         if ($this->request->isAJAX()) {
@@ -88,9 +85,6 @@ abstract class BaseController extends Controller
         return $this->json(false, 'Permintaan tidak valid.', null, 400);
     }
 
-    /**
-     * Kontrak CORE CrudTrait: jangan hapus atau ubah nama/signature method ini.
-     */
     protected function json(bool $success, array|string|null $message = null, $data = null, int $status = 200): ResponseInterface
     {
         $payload = ['success' => $success];

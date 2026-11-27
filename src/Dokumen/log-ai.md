@@ -17,7 +17,34 @@ Dokumen ini melengkapi [daftar-kerja.md](daftar-kerja.md) sebagai riwayat sesi.
 - Cantumkan: tujuan/ringkasan, label pekerjaan, file yang diubah, hasil verifikasi, dan catatan/temuan yang belum selesai.
 - Sertakan timestamp dengan zona waktu jika diketahui.
 
-## 2026-11-27T21:38:10+07:00 - Copilot Fusion
+## 2026-11-28 01:10 +07:00 — Copilot SDK (VS Code)
+
+- **Ringkasan:** Meninjau persiapan CORE 1.0.4, memperbaiki otorisasi profil lintas pengguna, dan menyelaraskan dokumentasi publish dengan sumber yang ada.
+- **Pekerjaan:**
+  - `[fix]` [Profil.php](../Controllers/Profil.php): pemilik dapat mengubah profil sendiri; melihat/mengubah profil pengguna lain mensyaratkan policy `vendor.user-list`. Endpoint ubah foto, akun, dan informasi memeriksa akses; ubah foto/informasi juga memverifikasi pasangan ID profil dan user.
+  - `[fix]` [profil.php](../Publish/Views/profil.php): deteksi pemilik menggunakan perbandingan ID numerik agar tab sesi tidak bergantung pada tipe string/int.
+  - `[doc]` [modul-profil.md](modul-profil.md): aturan akses profil lintas pengguna dan fungsi ID terenkripsi dijelaskan; batasan lama terkait pemeriksaan kepemilikan diperbarui.
+  - `[doc]` [daftar-kerja.md](daftar-kerja.md): mencatat implementasi otorisasi dan butir uji yang masih menunggu APP bersih.
+  - `[doc]` [README.md](../../README.md), [COMMAND.md](../../COMMAND.md), dan [ARSITEKTUR.md](../../ARSITEKTUR.md): versi target menjadi 1.0.4 dan daftar publish controller diselaraskan dengan `BaseController.php`, `Home.php`, serta `Profil.php`.
+  - `[doc]` [Publish/Controllers/Profil.php](../Publish/Controllers/Profil.php): contoh konfigurasi override diperbaiki agar mengganti namespace grup profil, bukan mendaftarkan route duplikat.
+- **Verifikasi:** `php -l` lulus untuk lima file PHP terkait; `node --check` lulus untuk dua file JS profil/upload; `composer validate --no-check-publish` dan `git diff --check` lulus.
+- **Catatan:** Belum dilakukan uji instalasi APP bersih, migrasi/seeder, login, atau uji akses profil end-to-end. Butir integrasi tetap `[r]`/`[ ]`; tidak ditandai lulus.
+
+## 2026-11-28 00:35:00 +07:00 — DeepSeek v4.1 Flash 1017 (CodeGPT)
+
+- **Ringkasan:** Profil dapat diubah/ditambah oleh APP tanpa menyalin controller CORE: controller menyediakan hook, route grup dapat diarahkan ke namespace APP, dan bug `updateInfo()` diperbaiki. Dokumentasi modul profil disusun.
+- **Pekerjaan:**
+  - `[add]` Hook di [Profil.php](../Controllers/Profil.php): `profilData($user, $userId)`, `profilView()`, dan `infoValidationRules()`. `index()` menggabungkan data hook dan memakai `view($this->profilView(), $data)`.
+  - `[add]` [Publish/Controllers/Profil.php](../Publish/Controllers/Profil.php) sebagai contoh override `App\Controllers\Profil` (`extends Cirebonweb\Controllers\Profil`).
+  - `[fix]` `Profil::index()` aman terhadap `?id=` yang gagal didekripsi/bukan angka (fallback ke `auth()->id()`) dan terhadap hasil `getProfil()` yang `null`; perbandingan `auth()->id()` memakai cast `int`.
+  - `[fix]` `Profil::updateInfo()` memakai `UserProfilModel::getValidationRules()`; sebelumnya memanggil properti `validationRules()` sehingga selalu `Call to undefined method`.
+  - `[rev]` [CrbRoutes.php](../Config/CrbRoutes.php) dan [Publish/Config/Routes.php](../Publish/Config/Routes.php): dokumentasi override controller via opsi `namespace` grup route; konstanta `NAMESPACE` diberi keterangan; method `daftarRute()` untuk inspeksi daftar route modul.
+  - `[doc]` Menambahkan [modul-profil.md](modul-profil.md) (batas CORE/APP, kontrak method `public`, daftar hook, tiga tingkat perubahan APP, batasan yang diketahui), indeks modul baru pada [Konsep.md](Konsep.md), dan butir kerja/uji pada [daftar-kerja.md](daftar-kerja.md).
+- **File:** `src/Controllers/Profil.php`, `src/Publish/Controllers/Profil.php` (baru), `src/Config/CrbRoutes.php`, `src/Publish/Config/Routes.php`, `src/Dokumen/modul-profil.md` (baru), `src/Dokumen/Konsep.md`, `src/Dokumen/daftar-kerja.md`, `src/Dokumen/log-ai.md`
+- **Verifikasi:** `php -l` lulus untuk seluruh file PHP yang diubah; `php spark routes` pada APP menampilkan seluruh endpoint `profil` mengarah ke `\App\Controllers\Profil`; `GET /profil` setelah login menghasilkan 200 dengan form upload dan `preview_foto_profil`; `POST /profil/update-info` dengan field tambahan mengembalikan `{"success": true, "messages": "Data berhasil diperbaharui."}`; log aplikasi tidak lagi memuat `Attempt to read property` maupun `undefined method` untuk profil.
+- **Catatan:** Uji dilakukan pada APP di mesin pengembangan (`cirebonweb-app`) menggunakan junction `vendor/cirebonweb/core` → repo CORE. Belum diuji pada APP bersih hasil `composer create-project` + `cirebonweb:publish --all`. `updateInfo()` masih belum memeriksa kepemilikan `profil_id` terhadap `user_id`; jaminan saat ini hanya foreign key. Salinan view/JS profil di `src/Publish/Public` dan `src/Publish/Views/profil.php` sudah berbeda dari CORE awal (perbaikan preview upload dan penyesuaian view) tetapi belum tercatat pada log sebelumnya.
+
+## 2026-11-27 21:38:10 +07:00 - Copilot Fusion
 
 - **Ringkasan:** Mengganti `CrbBaseController` dengan template `App\Controllers\BaseController` yang dipublish CORE, agar APP dapat mengembangkan base controller sendiri sambil mempertahankan kontrak CRUD CORE.
 - **Pekerjaan:**

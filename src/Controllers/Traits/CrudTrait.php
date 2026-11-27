@@ -10,44 +10,17 @@ use RuntimeException;
 /**
  * CrudTrait - Trait untuk operasi CRUD standar (DataTables, Get ID, Simpan, Hapus)
  *
- * STRUKTUR & ALUR KERJA:
- * ----------------------
- * 1. tabel()      : Mengembalikan data untuk DataTables (server-side processing)
- *    - Validasi AJAX request
- *    - Bangun query builder via crudBuilder()
- *    - Set searchable/orderable columns
- *    - Apply row callback dataTabel() wajib diimplementasikan controller
- *    - Return JSON DataTables format
- *
- * 2. getId()      : Ambil single record by ID
- *    - Validasi ID numerik
- *    - Coba model->getIdCustom($id) jika exists, else model->find($id)
- *    - Return JSON {success, data}
- *
- * 3. simpan()     : Insert ATAU Update (otomatis deteksi via $data['id'])
- *    - Validasi AJAX request
- *    - Ambil data dari dataSimpan() method controller atau $_POST
- *    - Convert empty string '' -> null (semua field)
- *    - Deteksi update: !empty($data['id']) -> ID '0' dianggap INSERT (design choice)
- *    - Model->save($data) handles both insert/update
- *    - Return JSON {success, messages, data}
- *
- * 4. hapus()      : Delete by ID
- *    - Validasi ID numerik
- *    - Model->delete($id) langsung (tanpa find() dulu)
- *    - Handle FK constraint error dengan custom message via $fkErrorMessage property
- *
  * DEPENDENCIES (wajib di Controller yang use trait ini):
  * ------------------------------------------------------
- * - $modelClass          : Class Model (diset di App\Controllers\BaseController)
- * - dataTabel($row)      : Method untuk format row DataTables (callback)
- * - Opsional: searchable[]  : Kolom pencarian
- * - Opsional: orderable[]   : Kolom sorting
+ * - $modelClass : Class Model (diset di App\Controllers\BaseController)
+ * - dataTabel($row) : Method untuk format row DataTables (callback)
+ * - Opsional: searchable[]   : Kolom pencarian
+ * - Opsional: orderable[]    : Kolom sorting
  * - Opsional: defaultOrder() : Default sorting
  * - Opsional: dataSimpan()   : Custom data sebelum simpan
  * - Opsional: dataSimpanResponse() : Custom response setelah simpan
  * - Opsional: builderTabel() / filterTabel() : Custom query builder
- * - Opsional: fkErrorMessage  : Custom FK error message
+ * - Opsional: fkErrorMessage : Custom FK error message
  *
  * DESIGN DECISIONS (BUKAN BUG, SENGAAJA):
  * ---------------------------------------
@@ -71,6 +44,14 @@ use RuntimeException;
  */
 trait CrudTrait
 {
+    /**
+     * 1. tabel() : Mengembalikan data untuk DataTables (server-side processing)
+     *    - Validasi AJAX request
+     *    - Bangun query builder via crudBuilder()
+     *    - Set searchable/orderable columns
+     *    - Apply row callback dataTabel() wajib diimplementasikan controller
+     *    - Return JSON DataTables format
+     */
     public function tabel(): ResponseInterface
     {
         if (($res = $this->ajax()) !== null) return $res;
@@ -88,6 +69,12 @@ trait CrudTrait
         return $this->response->setJSON($dataTable->getResult());
     }
 
+    /**
+     * 2. getId() : Ambil single record by ID
+     *    - Validasi ID numerik
+     *    - Coba model->getIdCustom($id) jika exists, else model->find($id)
+     *    - Return JSON {success, data}
+     */
     public function getId(): ResponseInterface
     {
         if (($res = $this->ajax()) !== null) return $res;
@@ -102,6 +89,15 @@ trait CrudTrait
         return $this->json(true, null, $data);
     }
 
+    /**
+     * 3. simpan() : Insert ATAU Update (otomatis deteksi via $data['id'])
+     *    - Validasi AJAX request
+     *    - Ambil data dari dataSimpan() method controller atau $_POST
+     *    - Convert empty string '' -> null (semua field)
+     *    - Deteksi update: !empty($data['id']) -> ID '0' dianggap INSERT (design choice)
+     *    - Model->save($data) handles both insert/update
+     *    - Return JSON {success, messages, data}
+     */
     public function simpan(): ResponseInterface
     {
         if (($res = $this->ajax()) !== null) return $res;
@@ -130,6 +126,12 @@ trait CrudTrait
         }
     }
 
+    /**
+     * 4. hapus() : Delete by ID
+     *    - Validasi ID numerik
+     *    - Model->delete($id) langsung (tanpa find() dulu)
+     *    - Handle FK constraint error dengan custom message via $fkErrorMessage property
+     */
     public function hapus(): ResponseInterface
     {
         if (($res = $this->ajax()) !== null) return $res;

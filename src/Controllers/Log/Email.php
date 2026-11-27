@@ -18,7 +18,7 @@ class Email extends BaseController
     public function index()
     {
         $data = [
-            'navigasi' => '<a href="/vendor/log">Log</a> &nbsp;',
+            'navigasi' => 'vendor &nbsp;'
         ];
         return view('Cirebonweb\log\log_email', $data);
     }

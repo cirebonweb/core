@@ -191,7 +191,7 @@ class UserList extends BaseController
     public function index()
     {
         return view('Cirebonweb\user\user_list', [
-            'navigasi'          => 'User &nbsp;',
+            'navigasi'          => 'vendor &nbsp;',
             'groupOptions'      => $this->grupYangBolehDitetapkan(),
             'groupOptionLabels' => $this->opsiGrupYangBolehDitetapkan(),
             'canManageGroup'    => $this->dapatKelolaGrup(),

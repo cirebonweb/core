@@ -32,7 +32,7 @@ class Cache extends Controller
 
         $data = [
             'url' => 'vendor/setting-cache',
-            'navigasi' => '<a href="/vendor/setting">Setting</a> &nbsp;',
+            'navigasi' => 'vendor &nbsp;',
             'durasiCache' => service('cacheTtl')->durasi(),
             'cache' => $dataCache
         ];

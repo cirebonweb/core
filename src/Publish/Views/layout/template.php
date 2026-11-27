@@ -92,8 +92,8 @@ $pageTitle = $currentMenu['label'] ?? ($pageTitle ?? '');
         <div class="sidebar-user">
           <div class="sidebar-user-icon"> <i class="bi bi-person-circle"></i> </div>
           <div class="sidebar-user-info">
-            <div class="sidebar-user-name"> <?= auth()->user()->username ?? 'Webmaster' ?> </div>
-            <div class="sidebar-user-role"> Administrator </div>
+            <div class="sidebar-user-name"> <?= esc(auth()->user()->username ?? 'User Name') ?> </div>
+            <div class="sidebar-user-role"> <?= esc(ucfirst(auth()->user()->getGroups()[0] ?? 'User Role')) ?> </div>
           </div>
           <a href="<?= url_to('logout') ?>" class="sidebar-user-logout" title="Logout"> <i class="bi bi-box-arrow-right"></i> </a>
         </div>

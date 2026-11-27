@@ -38,7 +38,7 @@ class UserLogin extends BaseController
     public function index()
     {
         $data = [
-            'navigasi' => '<a href="/vendor/user-list">User List</a> &nbsp;',
+            'navigasi' => 'vendor &nbsp;'
         ];
         return view('Cirebonweb\user\user_login', $data);
     }

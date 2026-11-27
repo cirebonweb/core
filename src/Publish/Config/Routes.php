@@ -14,6 +14,17 @@ $routes->get('/', 'Home::index', ['filter' => 'crbAkses:home.dashboard']);
  * Setiap grup route CORE memakai key modul yang sama dengan CrbAkses::$modules
  * dan key menu CORE terkait. Atur group pada app/Config/CrbAkses.php. Daftar
  * group kosong berarti modul publik.
+ *
+ * OVERRIDE HALAMAN CORE
+ * ---------------------
+ * Route CORE didaftarkan dengan namespace eksplisit Cirebonweb\Controllers.
+ * Untuk memakai controller APP (mis. App\Controllers\Profil yang extends
+ * Cirebonweb\Controllers\Profil), ganti namespace grupnya:
+ *
+ *   $crb->profil()->routes($routes, [
+ *       'namespace' => 'App\\Controllers',
+ *       'filter'    => 'crbAkses:profil',
+ *   ]);
  */
 $crb->profil()->routes($routes, ['filter' => 'crbAkses:profil']);
 $crb->userList()->routes($routes, ['filter' => 'crbAkses:vendor.user-list']);

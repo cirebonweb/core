@@ -88,23 +88,29 @@ mengaudit semua form dan request AJAX.
  php spark cirebonweb:publish --controllers
 ```
 
-> Grup `controllers` menyalin seluruh isi `src/Publish/Controllers`.
-> Saat ini sumbernya hanya berisi `Home.php`; `BaseController.php` tetap berasal
-> dari skeleton APP.
+> Grup `controllers` menyalin seluruh isi `src/Publish/Controllers`, termasuk
+> `BaseController.php` yang menjadi kontrak controller CORE, serta contoh
+> `Home.php` dan `Profil.php`.
 >
 > | File | Status |
 > |---|---|
-> | `BaseController.php` | ✅ berasal dari skeleton APP |
+> | `BaseController.php` | ✅ dipublish sebagai base controller APP untuk CORE |
 > | `Home.php` | ✅ dipublish sebagai contoh halaman awal APP |
+> | `Profil.php` | ✅ dipublish sebagai contoh override profil CORE |
 
 ### 📁 controllers files to be published
 ```ruby
 app/
 └── Controllers/
+    ├── BaseController.php
+    ├── Profil.php
     └── Home.php
 ```
 
-> `Home.php` ikut dipublish sebagai contoh yang dapat disesuaikan APP.
+`BaseController.php` merupakan fondasi bagi controller CORE yang menggunakan
+`CrudTrait`. Pertahankan kontrak properti dan method yang didokumentasikan di
+dalam file tersebut. `Home.php` dan `Profil.php` adalah contoh yang dapat
+disesuaikan APP.
 
 ## 🗄️ CORE database
 

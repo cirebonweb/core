@@ -35,39 +35,98 @@ class Profil extends BaseController
     public function index()
     {
         $encrypter = service('encrypter');
-        $encoded = $this->request->getGet('id');
+        $encoded   = $this->request->getGet('id');
+        $userId    = null;
 
         if ($encoded) {
-            $decoded = base64_decode($encoded);
-            $userId = $encrypter->decrypt($decoded);
-        } else {
+            try {
+                $decoded = base64_decode($encoded, true);
+                $decrypted = $decoded === false ? null : $encrypter->decrypt($decoded);
+                $userId = is_numeric($decrypted) ? (int) $decrypted : null;
+            } catch (\Throwable $e) {
+                log_message('error', 'Profil::index decrypt id gagal: ' . $e->getMessage());
+                $userId = null;
+            }
+        }
+
+        if (! $userId) {
             $userId = auth()->id();
         }
 
-        $user = $this->userModel->getProfil($userId);
+        if ($userId && ! $this->canManageProfile((int) $userId)) {
+            return $this->response->setStatusCode(403)->setBody('Forbidden');
+        }
 
-        if (!$user->id_profil) {
+        $user = $userId ? $this->userModel->getProfil($userId) : null;
+
+        if (! $user || ! $user->id_profil) {
             return redirect()->to('/')->with('error', 'Id user profil tidak ditemukan.');
         }
 
         $foto = is_null($user->foto) ? 'crb-profil.png' : $user->foto;
 
-        if (auth()->id() === $userId) {
+        if ((int) auth()->id() === (int) $userId) {
             $tabPane = 'tab-pane fade';
         } else {
             $tabPane = 'tab-pane fade show active';
         }
 
         $data = [
-            'url' => 'profil',
+            'url'       => 'profil',
             'pageTitle' => 'Profil',
-            'navigasi' => '',
-            'userId' => $userId,
-            'user' => $user,
-            'foto' => $foto,
-            'tabPane' => $tabPane
+            'navigasi'  => '',
+            'userId'    => $userId,
+            'user'      => $user,
+            'foto'      => $foto,
+            'tabPane'   => $tabPane
         ];
-        return view('profil', $data);
+
+        // Hook APP: tambahkan data lain untuk halaman profil.
+        $data = array_merge($data, $this->profilData($user, $userId));
+
+        // Hook APP: halaman view lain milik project (mis. 'profil_custom').
+        return view($this->profilView(), $data);
+    }
+
+    /**
+     * Hook APP: data tambahan untuk halaman profil.
+     * Override di App\Controllers\Profil untuk mengirim variabel view baru.
+     *
+     * @param object   $user   Baris hasil UserModel::getProfil()
+     * @param int|null $userId Id user yang sedang dilihat
+     * @return array
+     */
+    protected function profilData($user, $userId): array
+    {
+        return [];
+    }
+
+    /**
+     * Hook APP: nama view halaman profil.
+     * Override bila project memakai view sendiri, mis. return 'profil_custom'.
+     */
+    protected function profilView(): string
+    {
+        return 'profil';
+    }
+
+    private function canManageProfile(int $userId): bool
+    {
+        $authenticatedUserId = auth()->id();
+
+        if ($authenticatedUserId === null) {
+            return false;
+        }
+
+        return (int) $authenticatedUserId === $userId
+            || aksesModul('vendor.user-list');
+    }
+
+    private function profileBelongsToUser(int $userId, int $profileId): bool
+    {
+        return $this->userProfilModel
+            ->where('user_id', $userId)
+            ->find($profileId) !== null;
     }
 
     public function getPerangkat()
@@ -158,8 +217,22 @@ class Profil extends BaseController
 
     public function updateFoto()
     {
-        $idProfil = $this->request->getPost('id_profil');
-        $file     = $this->request->getFile('foto_profil');
+        $idUser   = filter_var($this->request->getPost('id_user'), FILTER_VALIDATE_INT);
+        $idProfil = filter_var($this->request->getPost('id_profil'), FILTER_VALIDATE_INT);
+
+        if (! is_int($idUser) || $idUser < 1 || ! is_int($idProfil) || $idProfil < 1) {
+            return redirect()->back()->with('error', 'ID profil tidak valid.');
+        }
+
+        if (! $this->canManageProfile($idUser)) {
+            return $this->response->setStatusCode(403)->setBody('Forbidden');
+        }
+
+        if (! $this->profileBelongsToUser($idUser, $idProfil)) {
+            return $this->response->setStatusCode(404)->setBody('Profil tidak ditemukan.');
+        }
+
+        $file = $this->request->getFile('foto_profil');
 
         // Validasi file
         if (!$this->validate([
@@ -233,10 +306,24 @@ class Profil extends BaseController
     public function updateAkun()
     {
         $response = [];
-        $idUser = $this->request->getPost('id_user');
+        $idUser   = filter_var($this->request->getPost('id_user'), FILTER_VALIDATE_INT);
 
-        $users = auth()->getProvider();
-        $user = $users->findById($idUser);
+        if (! is_int($idUser) || $idUser < 1) {
+            return $this->response->setStatusCode(400)->setJSON([
+                'success'  => false,
+                'messages' => 'ID user tidak valid.',
+            ]);
+        }
+
+        if (! $this->canManageProfile($idUser)) {
+            return $this->response->setStatusCode(403)->setJSON([
+                'success'  => false,
+                'messages' => 'Anda tidak memiliki akses untuk mengubah profil ini.',
+            ]);
+        }
+
+        $users    = auth()->getProvider();
+        $user     = $users->findById($idUser);
 
         if (!$user) {
             return $this->response->setJSON(['success'  => false, 'messages' => 'ID User tidak ditemukan.']);
@@ -283,24 +370,46 @@ class Profil extends BaseController
     public function updateInfo()
     {
         $response = [];
-        $idUser = $this->request->getPost('user_id');
-        $idProfil = $this->request->getPost('profil_id');
+        $idUser   = filter_var($this->request->getPost('user_id'), FILTER_VALIDATE_INT);
+        $idProfil = filter_var($this->request->getPost('profil_id'), FILTER_VALIDATE_INT);
 
-        if (!$idUser || !$idProfil) {
-            return $this->response->setJSON(['success'  => false, 'messages' => 'ID user profil tidak ditemukan.']);
+        if (! is_int($idUser) || $idUser < 1 || ! is_int($idProfil) || $idProfil < 1) {
+            return $this->response->setStatusCode(400)->setJSON([
+                'success'  => false,
+                'messages' => 'ID user profil tidak valid.',
+            ]);
+        }
+
+        if (! $this->canManageProfile($idUser)) {
+            return $this->response->setStatusCode(403)->setJSON([
+                'success'  => false,
+                'messages' => 'Anda tidak memiliki akses untuk mengubah profil ini.',
+            ]);
+        }
+
+        if (! $this->profileBelongsToUser($idUser, $idProfil)) {
+            return $this->response->setStatusCode(404)->setJSON([
+                'success'  => false,
+                'messages' => 'Profil tidak ditemukan.',
+            ]);
         }
 
         $data = [
-            'user_id' => $idUser,
+            'user_id'    => $idUser,
             'perusahaan' => $this->request->getPost('perusahaan'),
-            'whatsapp' => trim($this->request->getPost('whatsapp')),
-            'telegram' => trim($this->request->getPost('telegram')),
-            'alamat' => $this->request->getPost('alamat')
+            'whatsapp'   => trim($this->request->getPost('whatsapp')),
+            'telegram'   => trim($this->request->getPost('telegram')),
+            'alamat'     => $this->request->getPost('alamat')
         ];
 
-        $validasi = $this->userProfilModel->validationRules();
+        // Aturan validasi dari model (properti publik $validationRules).
+        $validasi = $this->userProfilModel->getValidationRules();
+
+        // Hook APP: kolom tambahan milik project, mis. ['kota' => 'permit_empty|max_length[50]'].
+        $validasi = array_merge($validasi, $this->infoValidationRules());
+
+        // Ambil semua field yang divalidasi (termasuk field tambahan APP).
         $data = $this->request->getPost(array_keys($validasi));
-        // array_keys($validasi) => ['user_id', 'perusahaan', 'whatsapp', 'telegram', 'alamat']
 
         if (! $this->validateData($data, $validasi)) {
             return $this->response->setJSON(['success'  => false, 'messages' => $this->validation->getErrors()]);
@@ -318,5 +427,18 @@ class Profil extends BaseController
             log_message('error', 'Gagal simpan profil/update-info: ' . $e->getMessage());
             return $this->response->setJSON(['success'  => false, 'messages' => 'Terjadi kesalahan saat merubah data.']);
         }
+    }
+
+    /**
+     * Hook APP: aturan validasi tambahan untuk tab Info.
+     * Override di App\Controllers\Profil, contoh:
+     *   return ['kota' => ['label' => 'Kota', 'rules' => 'permit_empty|max_length[50]']];
+     * Field harus terdaftar di $allowedFields model UserProfil milik APP.
+     *
+     * @return array
+     */
+    protected function infoValidationRules(): array
+    {
+        return [];
     }
 }

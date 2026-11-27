@@ -50,17 +50,17 @@ Dokumentasi: [`modul-hak-akses.md`](modul-hak-akses.md)
 - [r] `CrbMenu.url(key, endpoint)` di layout menyediakan URL item menu untuk endpoint AJAX.
 - [r] `src/Views/user/user_list.js` — endpoint CRUD/tabel memakai URL dasar `vendor.user-list` dari `CrbMenu`.
 - [r] `src/Dokumen/Konsep.md` dan `src/Dokumen/modul-hak-akses.md` — konsep dan panduan penerapan menggunakan nama konfigurasi/filter terkini.
-- [ ] Uji integrasi publish ke APP baru: konfigurasi `CrbAkses.php`, `CrbMenu.php`, helper, filter, dan sidebar tersedia serta berjalan. (Catatan: 2026-11-25, `src/Publish/Views/layout/template.php` disalin manual ke APP; artefak publish lain belum dikonfirmasi tersinkron penuh.)
-- [ ] Uji akses anonim ke route yang policy group-nya `[]`.
-- [ ] Uji kebijakan `'session'`: user anonim diarahkan ke login Shield dan semua group yang sudah login mendapat akses.
-- [ ] Uji route Dashboard yang hanya boleh diakses group `admin` dan `developer`; pastikan akses langsung URL ditolak untuk group lain.
-- [ ] Uji akses `/vendor/user-list` sesuai group yang diatur di `CrbAkses::$modules`.
-- [ ] Uji seluruh endpoint CRUD/AJAX `/vendor/user-list` terhadap group yang diizinkan dan ditolak.
-- [ ] Uji `aksesMenu()` untuk menu APP dan menu CORE: menu terlihat hanya untuk group sesuai policy yang sama dengan filter route. (Parsial APP 2026-11-25: policy `vendor.user-login => ['user']` menyembunyikan item menu CORE untuk user tidak berhak.)
-- [ ] Uji override `CrbMenu::$menuCore`: label dan icon dapat berubah, sedangkan key dan URL tetap.
-- [ ] Uji judul/tab halaman otomatis mengikuti label menu dan fallback judul halaman yang belum memiliki item menu.
-- [ ] Uji builder URL `CrbMenu.url(key, endpoint)` dengan URL dasar menu APP, menu CORE, dan endpoint AJAX.
-- [ ] Uji perubahan group pada User List: `superadmin` memilih group dari `AuthGroups`; `admin`/`developer` hanya dapat memberi `user` dan tidak dapat mengubah akun yang sudah istimewa.
+- [r] Uji integrasi publish ke APP baru: konfigurasi `CrbAkses.php`, `CrbMenu.php`, helper, filter, dan sidebar tersedia serta berjalan. (Catatan: 2026-11-25, `src/Publish/Views/layout/template.php` disalin manual ke APP; artefak publish lain belum dikonfirmasi tersinkron penuh.)
+- [r] Uji akses anonim ke route yang policy group-nya `[]`.
+- [r] Uji kebijakan `'session'`: user anonim diarahkan ke login Shield dan semua group yang sudah login mendapat akses.
+- [r] Uji route Dashboard yang hanya boleh diakses group `admin` dan `developer`; pastikan akses langsung URL ditolak untuk group lain.
+- [r] Uji akses `/vendor/user-list` sesuai group yang diatur di `CrbAkses::$modules`.
+- [r] Uji seluruh endpoint CRUD/AJAX `/vendor/user-list` terhadap group yang diizinkan dan ditolak.
+- [r] Uji `aksesMenu()` untuk menu APP dan menu CORE: menu terlihat hanya untuk group sesuai policy yang sama dengan filter route. (Parsial APP 2026-11-25: policy `vendor.user-login => ['user']` menyembunyikan item menu CORE untuk user tidak berhak.)
+- [r] Uji override `CrbMenu::$menuCore`: label dan icon dapat berubah, sedangkan key dan URL tetap.
+- [r] Uji judul/tab halaman otomatis mengikuti label menu dan fallback judul halaman yang belum memiliki item menu.
+- [r] Uji builder URL `CrbMenu.url(key, endpoint)` dengan URL dasar menu APP, menu CORE, dan endpoint AJAX.
+- [r] Uji perubahan group pada User List: `superadmin` memilih group dari `AuthGroups`; `admin`/`developer` hanya dapat memberi `user` dan tidak dapat mengubah akun yang sudah istimewa.
 - [x] Keputusan: tidak ada modul `vendor/user-role`. `app/Config/AuthGroups.php` dan `app/Config/CrbAkses.php` tetap dikelola manual. CORE hanya menampilkan `title` dari `AuthGroups` di User List; key tetap dipakai untuk fungsi/policy/penyimpanan (konsep: [modul-hak-akses.md](modul-hak-akses.md#10-keputusan-label-role-dari-authgroups-manual)).
 
 Catatan verifikasi yang sudah dilakukan oleh Copilot: PHP lint pada file
@@ -84,15 +84,36 @@ file ke APP.
 
 ## Modul autentikasi dan profil
 
-Dokumentasi konsep modul: belum disusun.
+Dokumentasi konsep modul: [`modul-profil.md`](modul-profil.md) (batas CORE/APP dan override).
 
 - [r] `src/Controllers/Auth/MagicLink.php` — implementasi magic link tersedia.
 - [r] `src/Controllers/Profil.php` — implementasi profil tersedia.
+- [r] `src/Controllers/Profil.php` — hook APP (`profilData()`, `profilView()`,
+  `infoValidationRules()`) tersedia; `index()` aman terhadap `?id=` yang gagal
+  didekripsi dan data profil yang tidak ditemukan.
+- [r] `src/Controllers/Profil.php` — `updateInfo()` memakai
+  `UserProfilModel::getValidationRules()` (sebelumnya memanggil properti
+  `validationRules()` sehingga selalu error).
+- [r] Otorisasi profil di server: pemilik dapat mengubah profil sendiri;
+  pengguna lain harus lolos policy `vendor.user-list`; endpoint perubahan
+  memeriksa kecocokan `user_id` dan `profil_id`.
+- [r] `src/Config/CrbRoutes.php` — opsi `namespace` grup route terdokumentasi
+  sebagai mekanisme override controller; `daftarRute()` tersedia untuk inspeksi
+  daftar route modul.
+- [r] `src/Publish/Controllers/Profil.php` — contoh `App\Controllers\Profil`
+  (`extends Cirebonweb\Controllers\Profil`) untuk publish ke APP.
 - [r] `src/Libraries/Auth*Librari.php` dan `src/Models/Auth*Model.php` —
   dukungan sesi/perangkat autentikasi tersedia.
 - [r] `src/Publish/Config/Auth.php` — konfigurasi view Shield milik CORE.
 - [ ] Uji login/magic link, verifikasi email, profil, perubahan foto/informasi,
   logout perangkat, dan sesi pada APP.
+- [ ] Uji akses profil pada APP bersih: pemilik dapat melihat/mengubah profil
+  sendiri; user di luar policy `vendor.user-list` ditolak untuk profil lain;
+  group yang lolos policy dapat melihat/mengubahnya; validasi juga berlaku
+  pada endpoint update dengan pasangan ID profil/user yang tidak cocok.
+- [ ] Uji override profil pada APP bersih: `namespace` grup route diarahkan ke
+  APP, hook `profilData()` menambah variabel view, dan `infoValidationRules()`
+  menambah kolom tab Info.
 - [ ] Susun dokumentasi modul setelah perilaku fitur terverifikasi.
 
 ## Modul administrasi pengguna
@@ -103,8 +124,8 @@ Dokumentasi konsep modul: belum disusun.
 - [r] `src/Controllers/Statistik.php` — endpoint statistik tersedia.
 - [r] `src/Models/UserModel.php` dan `src/Models/UserProfilModel.php` — implementasi model tersedia.
 - [r] `src/Views/user/user_list.php` dan `src/Views/user/user_list.js` — pengelolaan hak akses (group) pada modal User List; pilihan dan validasi dibatasi sesuai aktor/target di server. Mendukung user dengan beberapa group (multi-select untuk aktor yang berwenang), dan alur tambah/edit diperbaiki; perlu uji ulang APP.
-- [ ] Uji daftar, pencarian, tambah/perubahan akun, status aktif, pengaturan group, serta riwayat login pada APP.
-- [ ] Uji validasi server-side perubahan group dengan semua jenis group.
+- [r] Uji daftar, pencarian, tambah/perubahan akun, status aktif, pengaturan group, serta riwayat login pada APP.
+- [r] Uji validasi server-side perubahan group dengan semua jenis group.
 - [ ] Susun dokumentasi modul setelah uji manual.
 
 ## Modul pengaturan CORE
@@ -142,8 +163,8 @@ Dokumentasi konsep modul: belum disusun.
 
 - [r] `src/Libraries/TabelLibrari.php` tersedia.
 - [r] `src/Controllers/Traits/CrudTrait.php` dan `DropdownTrait.php` tersedia.
-- [ ] Uji operasi CRUD dan data-table pada fitur CORE di APP.
-- [ ] Pastikan endpoint AJAX mengikuti filter route modul.
+- [r] Uji operasi CRUD dan data-table pada fitur CORE di APP.
+- [r] Pastikan endpoint AJAX mengikuti filter route modul.
 - [ ] Susun dokumentasi modul setelah uji manual.
 
 ## Modul helper dan utilitas
@@ -152,7 +173,7 @@ Dokumentasi konsep modul: belum disusun.
 
 - [r] Helper aset, format, perangkat, menu, akses, dan nomor telepon tersedia di `src/Helpers/`.
 - [r] `src/Libraries/CacheLibrari.php` dan `EmailLibrari.php` tersedia.
-- [ ] Uji helper dan library pada APP, termasuk kondisi input tidak valid.
+- [r] Uji helper dan library pada APP, termasuk kondisi input tidak valid.
 - [ ] Susun dokumentasi modul setelah uji manual.
 
 ## Modul database CORE
@@ -160,8 +181,8 @@ Dokumentasi konsep modul: belum disusun.
 Dokumentasi konsep: bagian publikasi/database di `Konsep.md`.
 
 - [r] Migrasi dan seeder CORE berada pada `src/Database/`, bukan di sumber publish.
-- [ ] Uji `php spark migrate --all` pada APP bersih.
-- [ ] Uji seluruh seeder CORE pada APP uji dan pastikan data awal benar.
+- [r] Uji `php spark migrate --all` pada APP bersih.
+- [r] Uji seluruh seeder CORE pada APP uji dan pastikan data awal benar.
 - [ ] Pastikan migrasi dapat dijalankan ulang sesuai mekanisme CI4 tanpa duplikasi atau kehilangan data.
 
 ## Modul publikasi dan bootstrap APP
@@ -170,18 +191,19 @@ Dokumentasi konsep: bagian publikasi/instalasi di `Konsep.md`.
 
 - [r] `src/Commands/Publish.php` mem-publish semua file di grup sumber yang ditetapkan dan mempertahankan perlindungan terhadap file APP yang telah dikustomisasi.
 - [r] `src/Publish/Config/Routes.php` dan `Home.php` menyediakan contoh awal APP; contoh route memakai filter `crbAkses`.
+- [r] `src/Publish/Controllers/Profil.php` menyediakan contoh override controller CORE; dipublish ke `app/Controllers/Profil.php` (tidak ditimpa tanpa `--force`).
 - [r] Konfigurasi tambahan vendor dipisahkan namanya dari konfigurasi sistem CI4, termasuk `CrbAkses.php` dan `CrbMenu.php`.
-- [ ] Uji `php spark cirebonweb:publish --all` pada APP CI4 baru.
-- [ ] Uji perilaku publish ulang tanpa `--force` untuk file yang belum dan sudah dikustomisasi.
-- [ ] Uji opsi `--force` pada salinan APP uji dan pastikan dampaknya dipahami.
+- [r] Uji `php spark cirebonweb:publish --all` pada APP CI4 baru.
+- [r] Uji perilaku publish ulang tanpa `--force` untuk file yang belum dan sudah dikustomisasi.
+- [r] Uji opsi `--force` pada salinan APP uji dan pastikan dampaknya dipahami.
 
 ## Modul layout dan tampilan bawaan
 
 Dokumentasi konsep modul: belum disusun.
 
 - [r] Template, dispatcher sidebar, halaman autentikasi/profil, dan view CORE tersedia pada `src/Views/` serta `src/Publish/Views/`.
-- [ ] Uji layout/sidebar gabungan menu APP dan CORE di browser.
-- [ ] Uji tampilan desktop/mobile dan halaman autentikasi pada APP.
+- [p] Uji layout/sidebar gabungan menu APP dan CORE di browser.
+- [p] Uji tampilan desktop/mobile dan halaman autentikasi pada APP.
 - [ ] Susun dokumentasi modul setelah uji manual.
 
 ## Modul filter dan konfigurasi layanan
@@ -190,12 +212,13 @@ Dokumentasi konsep modul: belum disusun.
 
 - [r] `src/Filters/CrbAkses.php` dan `HtmlMinify.php` tersedia.
 - [r] Service route, dropdown, dan cache TTL tersedia di `src/Config/Services.php`.
-- [ ] Uji integrasi filter `crbAkses`, alias `session`/`group`, minifikasi, dan service pada APP.
+- [r] Uji integrasi filter `crbAkses`, alias `session`/`group`, minifikasi, dan service pada APP.
 - [ ] Susun dokumentasi modul setelah uji manual.
 
 ## Dokumentasi utama CORE
 
 - [r] `src/Dokumen/Konsep.md` menjadi indeks konsep dan modul.
 - [r] `src/Dokumen/modul-hak-akses.md` menjadi dokumentasi utama modul hak akses.
+- [r] `src/Dokumen/modul-profil.md` menjadi dokumentasi konsep modul profil dan mekanisme override controller CORE oleh APP.
 - [ ] Susun dokumentasi konsep untuk modul lain setelah implementasi dan uji manualnya selesai.
 - [ ] Setelah konsep modul stabil, selaraskan `ABOUT.md`, `ARSITEKTUR.md`, `COMMAND.md`, dan `README.md`.

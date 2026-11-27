@@ -28,7 +28,7 @@ class Umum extends BaseController
     {
         $data = [
             'url' => 'vendor/setting-umum/',
-            'navigasi' => '<a href="/vendor/setting">Setting</a>'
+            'navigasi' => 'vendor &nbsp;'
         ];
         return view('Cirebonweb\setting\umum', $data);
     }

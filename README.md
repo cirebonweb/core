@@ -4,7 +4,7 @@
 
 ## [Releases](https://github.com/cirebonweb/core/releases)
 
-Versi CORE saat ini: **1.0.3**. APP baru dapat memasang rilis stabil terbaru dengan
+Versi CORE saat ini: **1.0.4**. APP baru dapat memasang rilis stabil terbaru dengan
 `composer require cirebonweb/core`.
 
 [![About](https://img.shields.io/badge/About-Project%20Story-blue)](ABOUT.md)

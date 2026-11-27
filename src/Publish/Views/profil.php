@@ -1,4 +1,5 @@
 <?= $this->extend('layout/template') ?>
+<?php $isPemilikProfil = auth()->id() !== null && (int) auth()->id() === (int) $userId; ?>
 
 <?= $this->section("css") ?>
 <?= $this->include('plugin/tabel_css') ?>
@@ -49,7 +50,7 @@
                 <div class="card">
                     <div class="card-header p-2">
                         <ul class="nav nav-pills">
-                            <?php if (auth()->id() === $userId): ?>
+                            <?php if ($isPemilikProfil): ?>
                                 <li class="nav-item"><a class="nav-link active" href="#sesi" data-toggle="tab">Sesi</a></li>
                                 <li class="nav-item"><a class="nav-link" href="#akun" data-toggle="tab">Akun</a></li>
                             <?php else: ?>
@@ -63,7 +64,7 @@
                         <div class="tab-content">
 
                             <!-- sesi perangkat -->
-                            <?php if (auth()->id() === $userId): ?>
+                            <?php if ($isPemilikProfil): ?>
                                 <div class="tab-pane active fade show" id="sesi">
                                     <div id="sesi-list-container"></div>
                                     <div id="sesi-pagination-container" class="mt-4 d-flex justify-content-center"></div>
@@ -171,7 +172,7 @@
                                                     <div class="input-group-prepend">
                                                         <span class="input-group-text"><i class="bi bi-telegram"></i></span>
                                                     </div>
-                                                    <input type="text" class="form-control" id="telegram" name="telegram" placeholder="Telegram" value="<?= old('telegram', $user->telegram) ?>">
+                                                    <input type="text" class="form-control" id="telegram" name="telegram" placeholder="ID Telegram" value="<?= old('telegram', $user->telegram) ?>">
                                                 </div>
                                             </div>
 
@@ -206,7 +207,7 @@
 
 <script>
     let isPemilikProfil;
-    <?php if (auth()->id() === $userId): ?>
+    <?php if ($isPemilikProfil): ?>
         const $urlGetPerangkat = "<?= base_url($url . '/get-perangkat') ?>";
         isPemilikProfil = true;
     <?php else: ?>
@@ -220,5 +221,5 @@
 <script src="<?= versi('plugin/pica/pica.min.js') ?>" defer></script>
 <script src="<?= versi('vendor/js/helper_form.min.js') ?>" defer></script>
 <script src="<?= versi('vendor/js/helper_upload_single.min.js') ?>" defer></script>
-<script src="<?= base_url('vendor/js/page_profil.min.js') ?>" defer></script>
+<script src="<?= versi('vendor/js/page_profil.min.js') ?>" defer></script>
 <?= $this->endSection() ?>

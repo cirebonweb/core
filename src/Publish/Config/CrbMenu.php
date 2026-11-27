@@ -18,6 +18,12 @@ class CrbMenu extends BaseConfig
             'url'   => '/',
             'icon'  => 'bi bi-speedometer2',
         ],
+        [
+            'key'   => 'profil',
+            'label' => 'Profil',
+            'url'   => 'profil',
+            'icon'  => 'bi bi-person-circle',
+        ],
     ];
 
     /**

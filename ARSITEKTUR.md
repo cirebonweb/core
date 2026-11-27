@@ -98,7 +98,7 @@ Perintah: `php spark cirebonweb:publish [--all|--config|--controllers|--views|--
 | Flag | Sumber → tujuan | Kapan dipakai |
 |---|---|---|
 | `--config` | `src/Publish/Config` → `app/Config` | Sekali, saat setup awal. |
-| `--controllers` | `src/Publish/Controllers` → `app/Controllers` | Sekali, termasuk contoh `Home`; `BaseController` disediakan skeleton APP. |
+| `--controllers` | `src/Publish/Controllers` → `app/Controllers` | Sekali, termasuk `BaseController` untuk controller CORE serta contoh `Home` dan `Profil`. |
 | `--views` | `src/Publish/Views` → `app/Views` | Sekali, untuk view bootstrap dan titik penyesuaian navigasi APP. |
 | `--public` | `src/Publish/Public` → `public/` | Sekali. Aset statis. |
 | `--writable` | `src/Publish/Writable` → `writable/` | Sekali. Runtime `json/crb_cache.json`. |

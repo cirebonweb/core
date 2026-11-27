@@ -17,7 +17,7 @@ class CoreMenu extends BaseConfig
         [
             'key'      => 'vendor.user',
             'label'    => 'Pengguna',
-            'icon'     => 'bi bi-person-circle',
+            'icon'     => 'bi bi-people-fill',
             'children' => [
                 [
                     'key'   => 'vendor.user-list',
@@ -33,22 +33,22 @@ class CoreMenu extends BaseConfig
         ],
         [
             'key'      => 'vendor.setting',
-            'label'    => 'Pengaturan',
+            'label'    => 'Setting',
             'icon'     => 'bi bi-gear',
             'children' => [
                 [
                     'key'   => 'vendor.setting-umum',
-                    'label' => 'Umum',
+                    'label' => 'Setting Umum',
                     'url'   => 'vendor/setting-umum',
                 ],
                 [
                     'key'   => 'vendor.setting-cache',
-                    'label' => 'Cache',
+                    'label' => 'Setting Cache',
                     'url'   => 'vendor/setting-cache',
                 ],
                 [
                     'key'   => 'vendor.setting-optimasi',
-                    'label' => 'Optimasi',
+                    'label' => 'Setting Optimasi',
                     'url'   => 'vendor/setting-optimasi',
                 ],
             ],

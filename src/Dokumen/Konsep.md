@@ -37,7 +37,7 @@ pendukung lintas fitur dicatat terpisah dari modul fitur.
 | Modul/area | Fitur CORE saat ini | Lokasi implementasi utama | Dokumentasi konsep |
 | --- | --- | --- | --- |
 | Hak akses, user, dan menu | Integrasi Shield, group bawaan, pengelolaan group pada User List, route CORE, menu APP/CORE, dan visibilitas menu | `Config/CrbRoutes.php`, `Config/CoreMenu.php`, `Filters/CrbAkses.php`, `Helpers/crb_akses_helper.php`, `Helpers/crb_menu_helper.php`, `Publish/Config/CrbAkses.php`, `Publish/Config/CrbMenu.php` | [`modul-hak-akses.md`](modul-hak-akses.md) |
-| Autentikasi dan profil | Halaman magic link, profil akun, perubahan informasi/foto, serta pengelolaan perangkat dan sesi | `Controllers/Auth/`, `Controllers/Profil.php`, `Libraries/Auth*Librari.php`, `Models/Auth*Model.php`, `Views/shield/` | Belum disusun |
+| Autentikasi dan profil | Halaman magic link, profil akun, perubahan informasi/foto, pengelolaan perangkat dan sesi, serta hook override profil untuk APP | `Controllers/Auth/`, `Controllers/Profil.php`, `Libraries/Auth*Librari.php`, `Models/Auth*Model.php`, `Views/shield/` | [`modul-profil.md`](modul-profil.md) |
 | Administrasi pengguna | Daftar dan perubahan akun, status, group, serta peninjauan riwayat login | `Controllers/User/`, `Controllers/Statistik.php`, `Models/UserModel.php`, `Models/UserProfilModel.php` | Belum disusun |
 | Pengaturan CORE | Pengaturan umum situs dan SMTP, logo, cache, serta optimasi/log database | `Controllers/Setting/`, `Models/SettingModel.php`, `Config/Crb.php` | Belum disusun |
 | Statistik dan log email | Statistik pengguna, login, dan email; peninjauan serta pengelolaan log email | `Controllers/Statistik.php`, `Controllers/Log/Email.php`, `Models/LogEmailModel.php` | Belum disusun |
@@ -48,6 +48,7 @@ pendukung lintas fitur dicatat terpisah dari modul fitur.
 | Publikasi dan bootstrap APP | Publikasi konfigurasi, controller, view, aset statis, dan berkas writable yang digunakan APP | `Commands/Publish.php`, `Publish/` | Dirangkum pada bagian Publikasi dan Database serta Instalasi di bawah |
 | Layout dan tampilan bawaan | Template, navigasi APP/CORE, halaman profil, halaman autentikasi, dan potongan view pendukung | `Publish/Views/`, `Views/` | Belum disusun |
 | Filter dan konfigurasi layanan | Filter minifikasi HTML, konfigurasi CORE, service route, dropdown, dan sumber TTL cache | `Filters/`, `Config/` | Belum disusun |
+| Override controller CORE | Mekanisme APP mengganti atau menambah perilaku controller CORE melalui `namespace` grup route dan hook | `Config/CrbRoutes.php`, `Publish/Config/Routes.php`, `Publish/Controllers/` | [`modul-profil.md`](modul-profil.md) (contoh penerapan) |
 
 Tanda **Belum disusun** berarti indeks telah mengidentifikasi fitur dari
 implementasi, tetapi konsep lengkapnya belum dirangkum dalam dokumen modul.
@@ -81,6 +82,33 @@ inisialisasi model dalam `initController()`, serta method `crudModel()`,
 `crudSearchable()`, `crudOrderable()`, `ajax()`, dan `json()` merupakan kontrak
 yang dipakai `CrudTrait`; jangan menghapus atau mengubah nama/signature-nya
 tanpa menyesuaikan controller dan trait CORE.
+
+### Override controller CORE oleh APP
+
+Route CORE didaftarkan dengan namespace eksplisit `Cirebonweb\Controllers`
+(`CrbRoutes::routes()` menambahkan opsi `namespace`), sehingga class APP dengan
+nama yang sama **tidak** otomatis dipakai. APP yang membutuhkan controller
+sendiri mengubah namespace grup route tersebut:
+
+```php
+$crb->profil()->routes($routes, [
+    'namespace' => 'App\\Controllers',
+    'filter'    => 'crbAkses:profil',
+]);
+```
+
+Aturan yang berlaku untuk semua modul CORE:
+
+- Controller CORE menyediakan perilaku baku dan hook yang boleh di-override;
+  APP mengisi hook, bukan menyalin seluruh controller.
+- Method aksi controller CORE harus tetap `public` karena CI4 menolak method
+  non-public sebagai target route.
+- Controller contoh untuk override disediakan di `src/Publish/Controllers/`
+  dan hanya disalin sekali saat instalasi; setelah itu menjadi milik APP.
+- Perubahan pada salinan APP tidak ditimpa `cirebonweb:publish` tanpa `--force`.
+
+Penerapan lengkap pada modul Profil, termasuk daftar hook dan batasan yang
+diketahui, ada di [`modul-profil.md`](modul-profil.md).
 
 Seeder bukan bagian dari proses migrasi otomatis dan tidak dijalankan oleh
 perintah publish yang tersedia. Jalankan seeder secara eksplisit sesuai

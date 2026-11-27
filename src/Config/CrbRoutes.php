@@ -20,6 +20,28 @@ use CodeIgniter\Router\RouteCollection;
  * Halaman milik project TIDAK memakai prefiks `vendor/`, sehingga dari URL
  * saja sudah jelas mana core mana project.
  *
+ * OVERRIDE CONTROLLER
+ * -------------------
+ * Controller core memakai method `public` (wajib: CI4 menolak method non-public
+ * sebagai target route) sehingga dapat di-override project. Perlakuan di APP:
+ *
+ * 1. Ubah view/JS saja          -> cukup file di APP, controller tidak perlu.
+ * 2. Ubah sebagian perilaku     -> buat App\Controllers\Profil extends
+ *    Cirebonweb\Controllers\Profil, override method, lalu arahkan grup route
+ *    ke namespace APP:
+ *
+ *       $crb->profil()->routes($routes, [
+ *           'namespace' => 'App\\Controllers',
+ *           'filter'    => 'crbAkses:profil',
+ *       ]);
+ *
+ * 3. Tambah data/endpoint      -> override hook `profilData()`,
+ *    `infoValidationRules()`, `profilView()`, atau tambah method baru di
+ *    App\Controllers\Profil berikut route-nya sendiri.
+ *
+ * Jangan menduplikasi seluruh isi controller core: perbaikan bug dari core
+ * tidak akan diterima lagi oleh APP.
+ *
  * Contoh pendaftaran route dan filter APP ada di `src/Publish/Config/Routes.php`.
  */
 class CrbRoutes
@@ -30,6 +52,11 @@ class CrbRoutes
      * Prefiks URL untuk seluruh halaman bawaan core.
      */
     public const VENDOR = 'vendor';
+
+    /**
+     * Namespace controller core; dapat diganti namespace APP saat registrasi grup route.
+     */
+    public const NAMESPACE = 'Cirebonweb\\Controllers';
 
     protected array $routes = [];
     protected string $group = '';
@@ -174,6 +201,31 @@ class CrbRoutes
             ['post', 'magic-link', 'Auth\MagicLink::loginAction'],
             ['get',  'verify-magic-link', 'Auth\MagicLink::verify']
         ]);
+    }
+
+    /**
+     * Daftar route modul dalam bentuk array terstruktur (tanpa mendaftarkannya).
+     * Dipakai project yang ingin mendaftarkan ulang hanya sebagian route saja,
+     * mis. mengganti satu endpoint core dengan controller APP.
+     *
+     * Contoh di app/Config/Routes.php:
+     *
+     *   $routes->post(
+     *       'profil/update-info',
+     *       'Profil::updateInfo',
+     *       ['filter' => 'crbAkses:profil']
+     *   );
+     *
+     * @return list<array{method: string, path: string, handler: string}>
+     */
+    public function daftarRute(): array
+    {
+        $hasil = [];
+        foreach ($this->routes as [$method, $path, $handler]) {
+            $hasil[] = ['method' => $method, 'path' => $path, 'handler' => $handler];
+        }
+
+        return $hasil;
     }
 
     /**

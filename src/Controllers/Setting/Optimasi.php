@@ -10,7 +10,7 @@ class Optimasi extends BaseController
     public function index()
     {
         $data = [
-            'navigasi' => '<a href="/vendor/setting">Setting</a> &nbsp;',
+            'navigasi' => 'vendor &nbsp;',
         ];
         return view('Cirebonweb\setting\optimasi', $data);
     }

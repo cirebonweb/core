@@ -1,3 +1,5 @@
+<li class="nav-header">VENDOR</li>
+
 <?php
 
 $menus = crb_menu_items('core');
