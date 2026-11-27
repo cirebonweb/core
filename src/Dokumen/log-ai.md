@@ -17,6 +17,15 @@ Dokumen ini melengkapi [daftar-kerja.md](daftar-kerja.md) sebagai riwayat sesi.
 - Cantumkan: tujuan/ringkasan, label pekerjaan, file yang diubah, hasil verifikasi, dan catatan/temuan yang belum selesai.
 - Sertakan timestamp dengan zona waktu jika diketahui.
 
+
+## 2026-11-28 03:19:46 +07:00 — Copilot SDK (VS Code)
+
+- **Ringkasan:** Memperbaiki validasi server-side Telegram Chat ID yang menolak ID numerik valid seperti `987654321`.
+- **Pekerjaan:**
+  - `[fix]` Mengganti pola `regex_match` pada [SettingModel.php](../Models/SettingModel.php) agar tidak menggunakan kelas karakter siku yang bentrok dengan parser rule CI4; pola sekarang menerima ID numerik bertanda minus dan `@username` 5-32 karakter.
+- **File:** `src/Models/SettingModel.php`, `src/Dokumen/log-ai.md`
+- **Verifikasi:** `php -l` lulus; uji pola menerima `987654321`, chat ID grup negatif, dan `@public_channel`, serta menolak input bercampur karakter, tanda `+`, dan username terlalu pendek. Belum dapat menjalankan validasi melalui service CI4 karena dependency framework tidak tersedia di workspace CORE.
+
 ## 2026-11-28 02:59:39 +07:00 — Copilot SDK (VS Code)
 
 - **Ringkasan:** Menyiapkan revisi 1.0.5 untuk pengujian Composer di APP lain dan meninjau ulang perbandingan kepemilikan profil.
