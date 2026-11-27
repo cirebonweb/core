@@ -17,7 +17,19 @@ Dokumen ini melengkapi [daftar-kerja.md](daftar-kerja.md) sebagai riwayat sesi.
 - Cantumkan: tujuan/ringkasan, label pekerjaan, file yang diubah, hasil verifikasi, dan catatan/temuan yang belum selesai.
 - Sertakan timestamp dengan zona waktu jika diketahui.
 
-## 2026-11-25 08:44:12 +07:00 — MAI (Microsoft AI)
+## 2026-11-27T21:38:10+07:00 - Copilot Fusion
+
+- **Ringkasan:** Mengganti `CrbBaseController` dengan template `App\Controllers\BaseController` yang dipublish CORE, agar APP dapat mengembangkan base controller sendiri sambil mempertahankan kontrak CRUD CORE.
+- **Pekerjaan:**
+  - `[add]` Menambahkan [BaseController.php](../Publish/Controllers/BaseController.php) sebagai sumber publish `app/Controllers/BaseController.php`, dengan dokumentasi PHPDoc untuk properti dan method yang menjadi kontrak CrudTrait dan tidak boleh dihapus/diubah tanpa penyesuaian terkait.
+  - `[rev]` Mengubah controller CORE terkait agar memakai `App\Controllers\BaseController`; menghapus `src/Controllers/CrbBaseController.php`.
+  - `[rev]` Memperbarui keterangan dependensi [CrudTrait.php](../Controllers/Traits/CrudTrait.php).
+  - `[doc]` Menambahkan kebijakan BaseController publish dan merge manual APP ke [Konsep.md](Konsep.md).
+- **File:** `src/Publish/Controllers/BaseController.php`, `src/Controllers/CrbBaseController.php` (dihapus), `src/Controllers/Dropdown.php`, `src/Controllers/Setting/UmumLogo.php`, `src/Controllers/Setting/Optimasi.php`, `src/Controllers/User/UserList.php`, `src/Controllers/User/UserLogin.php`, `src/Controllers/Traits/CrudTrait.php`, `src/Dokumen/Konsep.md`, `src/Dokumen/log-ai.md`
+- **Verifikasi:** `php -l` lulus untuk BaseController baru, CrudTrait, serta seluruh controller yang dialihkan; `rg` tidak menemukan referensi tersisa ke `CrbBaseController`; `git diff --check` tanpa error whitespace.
+- **Catatan:** Publish biasa tetap mengikuti aturan publisher yang menghindari penimpaan file APP yang sudah berubah. Jika APP menambah kode ke `BaseController.php`, pembaruan CORE perlu digabung manual sesuai keputusan.
+
+## 2026-11-25 08:44:12 +07:00 — Copilot Fusion
 
 - **Ringkasan:** Memperbarui pencatatan progres dan menindaklanjuti temuan uji APP pada User List (tambah user dan pengelolaan hak akses multi-group).
 - **Pekerjaan:**
@@ -28,7 +40,7 @@ Dokumen ini melengkapi [daftar-kerja.md](daftar-kerja.md) sebagai riwayat sesi.
 - **Verifikasi:** `php -l` pada controller/model/view PHP yang diubah dan `node --check` pada `src/Views/user/user_list.js` lulus; `git diff --check` pada file yang disentuh lulus. Uji integrasi/manual APP belum dilakukan.
 - **Catatan:** Temuan APP yang ditindaklanjuti: tambah user baru memunculkan "Peringatan ID user tidak ditemukan" dan edit hak akses hanya memilih satu role meski data bisa multi-group (contoh `admin, superadmin`). Perbaikan perlu disinkronkan ke APP dan diuji ulang, termasuk sinkronisasi artefak publish CORE â†’ APP.
 
-## 2026-11-25 08:59:02 +07:00 — MAI (Microsoft AI)
+## 2026-11-25 08:59:02 +07:00 — Copilot Fusion
 
 - **Ringkasan:** Menambahkan rancangan konsep custom role dinamis.
 - **Pekerjaan:**
@@ -38,15 +50,14 @@ Dokumen ini melengkapi [daftar-kerja.md](daftar-kerja.md) sebagai riwayat sesi.
 - **Verifikasi:** Pemeriksaan isi dokumen; belum ada implementasi kode atau uji.
 - **Catatan:** Rancangan ini dapat memengaruhi keputusan sumber daftar group dan sifat kebijakan modul; perlu ditinjau saat implementasi.
 
-## 2026-11-25 12:43:01 +07:00 — MAI (Microsoft AI)
+## 2026-11-25 12:43:01 +07:00 — Copilot Fusion
 
-- **Ringkasan:** Eksperimen label role via vendor/user-role/settings dibatalkan; kembali ke alur manual. User List menampilkan 	itle dari AuthGroups, key tetap dipakai untuk fungsi/policy/penyimpanan.
+- **Ringkasan:** Eksperimen label role via `vendor/user-role`/settings dibatalkan; kembali ke alur manual. User List menampilkan `title` dari AuthGroups, key tetap dipakai untuk fungsi/policy/penyimpanan.
 - **Pekerjaan:**
-  - [rev] Menghapus modul vendor/user-role (route/menu/policy/controller/view/JS) dan helper override settings; crb_group_label() membaca title langsung dari config('AuthGroups').
-  - [rev] [UserList.php](../Controllers/User/UserList.php) menampilkan label role dari AuthGroups (key tetap dikirim/disimpan); kompatibel groupOptions/groupOptionLabels.
-  - [rev] [user_list.php](../Views/user/user_list.php) dan [user_list.js](../Views/user/user_list.js): bidang Hak Akses menggunakan Select2 multi-value (multiple), opsi grup tetap tampil saat Add/Edit sesuai kewenangan.
-  - [doc] [modul-hak-akses.md](modul-hak-akses.md) dan [daftar-kerja.md](daftar-kerja.md) disesuaikan dengan keputusan manual.
-- **File:** src/Helpers/crb_akses_helper.php, src/Controllers/User/UserList.php, src/Views/user/user_list.php, src/Views/user/user_list.js, src/Config/CrbRoutes.php, src/Config/CoreMenu.php, src/Publish/Config/CrbAkses.php, src/Publish/Config/Routes.php, src/Dokumen/modul-hak-akses.md, src/Dokumen/daftar-kerja.md, src/Dokumen/log-ai.md
-- **Verifikasi:** php -l lulus untuk file PHP yang diubah;
-ode --check lulus untuk user_list.js.
-- **Catatan:** Custom role/label dikelola manual di app/Config/AuthGroups.php; pemetaan modul manual di app/Config/CrbAkses.php.
+  - `[rev]` Menghapus modul `vendor/user-role` (route/menu/policy/controller/view/JS) dan helper override settings; `crb_group_label()` membaca title langsung dari `config('AuthGroups')`.
+  - `[rev]` [UserList.php](../Controllers/User/UserList.php) menampilkan label role dari AuthGroups (key tetap dikirim/disimpan); kompatibel `groupOptions`/`groupOptionLabels`.
+  - `[rev]` [user_list.php](../Views/user/user_list.php) dan [user_list.js](../Views/user/user_list.js): bidang Hak Akses menggunakan Select2 multi-value (`multiple`), opsi grup tetap tampil saat Add/Edit sesuai kewenangan.
+  - `[doc]` [modul-hak-akses.md](modul-hak-akses.md) dan [daftar-kerja.md](daftar-kerja.md) disesuaikan dengan keputusan manual.
+- **File:** `src/Helpers/crb_akses_helper.php`, `src/Controllers/User/UserList.php`, `src/Views/user/user_list.php`, `src/Views/user/user_list.js`, `src/Config/CrbRoutes.php`, `src/Config/CoreMenu.php`, `src/Publish/Config/CrbAkses.php`, `src/Publish/Config/Routes.php`, `src/Dokumen/modul-hak-akses.md`, `src/Dokumen/daftar-kerja.md`, `src/Dokumen/log-ai.md`
+- **Verifikasi:** `php -l` lulus untuk file PHP yang diubah; `node --check` lulus untuk `user_list.js`.
+- **Catatan:** Custom role/label dikelola manual di `app/Config/AuthGroups.php`; pemetaan modul manual di `app/Config/CrbAkses.php`.

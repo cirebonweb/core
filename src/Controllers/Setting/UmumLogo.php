@@ -2,10 +2,10 @@
 
 namespace Cirebonweb\Controllers\Setting;
 
-use Cirebonweb\Controllers\CrbBaseController;
+use App\Controllers\BaseController;
 use Cirebonweb\Models\SettingModel;
 
-class UmumLogo extends CrbBaseController
+class UmumLogo extends BaseController
 {
     /**
      * @var \Cirebonweb\Models\SettingModel $settingModel

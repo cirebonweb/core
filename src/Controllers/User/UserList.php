@@ -2,14 +2,14 @@
 
 namespace Cirebonweb\Controllers\User;
 
-use Cirebonweb\Controllers\CrbBaseController;
+use App\Controllers\BaseController;
 use CodeIgniter\Shield\Entities\User;
 use CodeIgniter\Database\BaseBuilder;
 use Cirebonweb\Models\UserModel;
 use Cirebonweb\Models\UserProfilModel;
 use Cirebonweb\Controllers\Traits\CrudTrait;
 
-class UserList extends CrbBaseController
+class UserList extends BaseController
 {
     use CrudTrait;
     protected UserProfilModel $userProfilModel;

@@ -2,12 +2,12 @@
 
 namespace Cirebonweb\Controllers\User;
 
-use Cirebonweb\Controllers\CrbBaseController;
+use App\Controllers\BaseController;
 use CodeIgniter\Database\BaseBuilder;
 use Cirebonweb\Models\AuthLoginsModel;
 use Cirebonweb\Controllers\Traits\CrudTrait;
 
-class UserLogin extends CrbBaseController
+class UserLogin extends BaseController
 {
     use CrudTrait;
     protected UserProfilModel $userProfilModel;

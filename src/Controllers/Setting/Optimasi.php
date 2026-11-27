@@ -2,9 +2,9 @@
 
 namespace Cirebonweb\Controllers\Setting;
 
-use Cirebonweb\Controllers\CrbBaseController;
+use App\Controllers\BaseController;
 
-class Optimasi extends CrbBaseController
+class Optimasi extends BaseController
 {
 
     public function index()

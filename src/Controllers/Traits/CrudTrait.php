@@ -39,7 +39,7 @@ use RuntimeException;
  *
  * DEPENDENCIES (wajib di Controller yang use trait ini):
  * ------------------------------------------------------
- * - $modelClass          : Class Model (diset di CrbBaseController)
+ * - $modelClass          : Class Model (diset di App\Controllers\BaseController)
  * - dataTabel($row)      : Method untuk format row DataTables (callback)
  * - Opsional: searchable[]  : Kolom pencarian
  * - Opsional: orderable[]   : Kolom sorting
@@ -61,7 +61,8 @@ use RuntimeException;
  *
  * KNOWN LIMITATIONS / CATATAN:
  * ----------------------------
- * - Trait bergantung pada CrbBaseController untuk: $model, crudModel(), ajax(), json()
+ * - Trait bergantung pada kontrak App\Controllers\BaseController untuk:
+ *   $modelClass, $model, crudModel(), crudSearchable(), crudOrderable(), ajax(), json()
  * - Model HARUS punya method tabel() atau builder() untuk crudRawBuilder()
  * - DataTables library: Cirebonweb\Libraries\TabelLibrari
  * - PHP 8.1+: Menggunakan arrow function (Closure::fromCallable deprecated)

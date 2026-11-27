@@ -74,6 +74,14 @@ namespace `Cirebonweb`. Aset `plugin/` dan `vendor/` di bawah `src/Publish/Publi
 adalah aset rawatan yang tidak ikut dipublish; APP menyalin atau menyelaraskannya
 secara manual. Aset instalasi seperti `upload/` dapat dipublish.
 
+`src/Publish/Controllers/BaseController.php` adalah template untuk
+`app/Controllers/BaseController.php`. APP boleh menambahkan kode sendiri dan
+menggabungkan pembaruan CORE secara manual. Properti `$modelClass` dan `$model`,
+inisialisasi model dalam `initController()`, serta method `crudModel()`,
+`crudSearchable()`, `crudOrderable()`, `ajax()`, dan `json()` merupakan kontrak
+yang dipakai `CrudTrait`; jangan menghapus atau mengubah nama/signature-nya
+tanpa menyesuaikan controller dan trait CORE.
+
 Seeder bukan bagian dari proses migrasi otomatis dan tidak dijalankan oleh
 perintah publish yang tersedia. Jalankan seeder secara eksplisit sesuai
 kebutuhan APP. Sebelum memakai seeder contoh pada lingkungan produksi, periksa
@@ -132,6 +140,7 @@ app/
 │   ├── Routes.php
 │   └── Session.php
 ├── Controllers/
+│   ├── BaseController.php
 │   └── Home.php
 ├── Public/
 │   ├── plugin/*
