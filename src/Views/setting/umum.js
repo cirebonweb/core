@@ -11,6 +11,9 @@ let $sistemForm = $("#sistemForm"),
     $smtpForm = $("#smtpForm"),
     $smtpSubmit = $("#smtpSubmit");
 
+/**
+ * [SMTP] Toggle tampilan password SMTP.
+ */
 function cekpwd() {
     let input = $("#smtpPass").get(0);
     "password" === input.type
@@ -20,14 +23,23 @@ function cekpwd() {
 
 window.cekpwd = cekpwd;
 
+/**
+ * [SMTP] Inisialisasi tooltip umum dan perubahan port enkripsi.
+ */
 $(function () {
     $('[data-toggle="tooltip"]').tooltip(),
-        $("#smtpCrypto").on("change", function () {
+        $("#smtpCrypto").on("change", /**
+         * [SMTP] Sesuaikan port saat protokol enkripsi berubah.
+         */
+        function () {
             let port = "ssl" === $(this).val() ? 465 : 25;
             $("#smtpPort").val(port);
         });
 });
 
+/**
+ * [Sistem] Inisialisasi validasi dan penyimpanan pengaturan sistem.
+ */
 $(function () {
     let formCek = CirebonwebForm.Cek($sistemForm);
     $sistemForm.validate(
@@ -39,7 +51,8 @@ $(function () {
                 authRemembering: { required: !0 },
                 authRememberLength: { required: !0, digits: !0, minlength: 5, maxlength: 30 },
             },
-            submitHandler: function () {
+            submitHandler:
+            function () {
                 return (
                     !!formCek.isChanged() &&
                     (CirebonwebForm.Fetch(
@@ -47,19 +60,20 @@ $(function () {
                         $sistemForm.serializeArray(),
                         "POST",
                         {
-                            before_call: function () {
+                            before_call:
+                            function () {
                                 if (!formCek.isChanged()) return !1;
                                 $sistemSubmit
                                     .attr("disabled", !0)
-                                    .html(
-                                        '<span class="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span> Loading...'
-                                    );
+                                    .html('<span class="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span> Loading...');
                             },
-                            after_call: function () {
+                            after_call:
+                            function () {
                                 $sistemSubmit.attr("disabled", !1).html("Simpan");
                             },
                         }
-                    ).done(function (response) {
+                    ).done(
+                    function (response) {
                         if (!response.success) return;
                         CirebonwebForm.Sukses(response.messages).then(() => {
                             formCek.resetInitial();
@@ -73,6 +87,9 @@ $(function () {
     );
 });
 
+/**
+ * [Situs] Inisialisasi validasi dan penyimpanan informasi situs.
+ */
 $(function () {
     let formCek = CirebonwebForm.Cek($situsForm);
     $situsForm.validate(
@@ -83,11 +100,17 @@ $(function () {
                 siteTagline: { required: !0, minlength: 5, maxlength: 50 },
                 siteTelp: { required: !1, digits: !0, minlength: 5, maxlength: 50 },
                 siteWa: { required: !0, digits: !0, minlength: 8, maxlength: 15 },
-                siteTelegram: { required: !1, digits: !0, minlength: 8, maxlength: 15 },
+                siteTelegram: {
+                    required: !1,
+                    pattern: /^(-?\d{1,20}|@[A-Za-z0-9_]{5,32})$/,
+                },
                 siteEmail: { required: !0, customEmail: !0 },
                 siteAlamat: { required: !0, minlength: 10, maxlength: 255 },
             },
-            submitHandler: function () {
+            submitHandler: /**
+             * [Situs] Simpan identitas dan informasi kontak situs.
+             */
+            function () {
                 return (
                     !!formCek.isChanged() &&
                     (CirebonwebForm.Fetch(
@@ -95,24 +118,24 @@ $(function () {
                         $situsForm.serializeArray(),
                         "POST",
                         {
-                            before_call: function () {
+                            before_call: /**
+                             * [Situs] Tampilkan status loading sebelum request.
+                             */
+                            function () {
                                 if (!formCek.isChanged()) return !1;
                                 $situsSubmit
                                     .attr("disabled", !0)
-                                    .html(
-                                        '<span class="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span> Loading...'
-                                    );
+                                    .html('<span class="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span> Loading...');
                             },
-                            after_call: function () {
+                            after_call:
+                            function () {
                                 $situsSubmit.attr("disabled", !1).html("Simpan");
                             },
                         }
-                    ).done(function (response) {
+                    ).done(
+                    function (response) {
                         if (!response.success) return;
-                        CirebonwebForm.Sukses(response.messages).then(() => {
-                            formCek.resetInitial();
-                            CirebonwebForm.Reset($situsForm);
-                        });
+                        CirebonwebForm.Sukses(response.messages).then(() => window.location.reload());
                     }),
                         !1)
                 );
@@ -121,6 +144,9 @@ $(function () {
     );
 });
 
+/**
+ * [SMTP] Inisialisasi validasi dan penyimpanan konfigurasi email.
+ */
 $(function () {
     let formCek = CirebonwebForm.Cek($smtpForm);
     $smtpForm.validate(
@@ -137,7 +163,8 @@ $(function () {
                 smtpUser: { required: !0, minlength: 10, maxlength: 100, customEmail: !0 },
                 smtpPass: { required: !1, minlength: 8 },
             },
-            submitHandler: function () {
+            submitHandler:
+            function () {
                 return (
                     !!formCek.isChanged() &&
                     (CirebonwebForm.Fetch(
@@ -145,7 +172,8 @@ $(function () {
                         $smtpForm.serializeArray(),
                         "POST",
                         {
-                            before_call: function () {
+                            before_call:
+                            function () {
                                 if (!formCek.isChanged()) return !1;
                                 $smtpSubmit
                                     .attr("disabled", !0)
@@ -153,11 +181,13 @@ $(function () {
                                         '<span class="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span> Loading...'
                                     );
                             },
-                            after_call: function () {
+                            after_call:
+                            function () {
                                 $smtpSubmit.attr("disabled", !1).html("Simpan");
                             },
                         }
-                    ).done(function (response) {
+                    ).done(
+                    function (response) {
                         if (!response.success) return;
                         CirebonwebForm.Sukses(response.messages).then(() => {
                             formCek.resetInitial();

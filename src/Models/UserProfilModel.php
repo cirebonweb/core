@@ -18,7 +18,7 @@ class UserProfilModel extends Model
         'user_id' => ['label' => 'Id User', 'rules' => 'required|integer'],
         'perusahaan' => ['label' => 'Perusahaan', 'rules' => 'permit_empty|min_length[5]|max_length[30]'],
         'whatsapp' => ['label' => 'Whatsapp', 'rules' => 'permit_empty|integer|min_length[8]|max_length[15]'],
-        'telegram' => ['label' => 'Telegram', 'rules' => 'permit_empty|integer|min_length[8]|max_length[15]'],
+        'telegram' => ['label' => 'Id Telegram', 'rules' => 'permit_empty|integer|min_length[8]|max_length[15]'],
         'alamat' => ['label' => 'Alamat', 'rules' => 'permit_empty|min_length[10]|max_length[100]'],
         // 'foto' => ['label' => 'Foto Profil', 'rules' => 'permit_empty|max_size[foto,2048]|is_image[foto]|mime_in[foto,image/jpg,image/jpeg,image/png]']
     ];
@@ -60,6 +60,9 @@ class UserProfilModel extends Model
         return $rules;
     }
 
+    /**
+     * @param mixed $id
+     */
     public function getFoto($id)
     {
         return $this->select('foto')->where('id', $id)->get()->getRow('foto');

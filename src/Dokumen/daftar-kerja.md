@@ -82,6 +82,11 @@ group (contoh `admin, superadmin`). Perbaikan alur tambah/edit dan dukungan
 multi-group telah diterapkan di CORE; perlu uji ulang APP setelah sinkronisasi
 file ke APP.
 
+Uji manual APP (2026-11-28): pengguna mengonfirmasi halaman bawaan vendor,
+termasuk profil, User List, Setting Umum, serta CRUD/fungsi terkait berjalan
+normal. Pengujian yang membutuhkan pengiriman email (mis. reset password dan
+magic link) ditunda sampai APP diuji online/hosting.
+
 ## Modul autentikasi dan profil
 
 Dokumentasi konsep modul: [`modul-profil.md`](modul-profil.md) (batas CORE/APP dan override).
@@ -136,7 +141,9 @@ Dokumentasi konsep modul: belum disusun.
 - [r] `src/Controllers/Setting/Cache.php` — pengelolaan cache tersedia.
 - [r] `src/Controllers/Setting/Optimasi.php` — pengelolaan log/debug dan optimasi database tersedia.
 - [r] `src/Models/SettingModel.php` dan `src/Config/Crb.php` — komponen konfigurasi/model tersedia.
-- [r] Uji simpan pengaturan situs/SMTP dan pengunggahan logo.
+- [x] Uji manual halaman Setting Umum dan fungsi terkait pada APP: halaman berjalan normal; simpan informasi situs dan pengunggahan logo termasuk dalam pengujian fungsi.
+- [r] `siteTelegram` diperlakukan sebagai Telegram Chat ID untuk notifikasi bot (ID numerik atau `@username` channel), bukan nomor telepon. Nilai ini opsional.
+- [ ] Uji kirim email/SMTP, reset password, dan magic link di APP online/hosting; sengaja ditunda.
 - [r] Uji penghapusan cache/log dan operasi optimasi database pada APP uji.
 - [ ] Susun dokumentasi modul setelah uji manual.
 

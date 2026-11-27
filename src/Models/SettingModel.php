@@ -65,8 +65,8 @@ class SettingModel extends Model
                 'rules'  => 'required|min_length[8]|max_length[15]|integer',
             ],
             'siteTelegram' => [
-                'label'  => 'Telegram',
-                'rules'  => 'permit_empty|min_length[8]|max_length[15]|integer',
+                'label'  => 'Telegram Chat ID',
+                'rules'  => 'permit_empty|regex_match[#\A(?:-?[0-9]{1,20}|@[A-Za-z0-9_]{5,32})\z#]',
             ],
             'siteEmail' => [
                 'label'  => 'Email',

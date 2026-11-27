@@ -159,7 +159,8 @@ Jalankan secara eksplisit menggunakan nama kelas penuh bila APP membutuhkannya.
 Isinya:
 - `SettingsSeeder` → mengisi tabel `settings` (nama situs, SMTP, logo, sosial).
 - `UserSeeder` → **membuat** user login contoh `admin@mail.com` / `cirebon321`
-  (group `admin`) + baris `user_profil`.
+  (group `superadmin`) dan `user@mail.com` / `cirebon321` (group `user`), serta
+  baris `user_profil` untuk keduanya.
 
 `UserSeeder` membuat akun contoh dengan kredensial tetap; tinjau dan ubah atau
 hapus data tersebut sebelum menjalankan seeder di lingkungan produksi.

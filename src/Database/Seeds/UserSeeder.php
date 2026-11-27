@@ -26,7 +26,7 @@ class UserSeeder extends Seeder
         $adminId = $users->getInsertID();
 
         $adminUser = $users->findById($adminId);
-        $adminUser->addGroup('admin');
+        $adminUser->addGroup('superadmin');
         $userProfilModel->insert(['user_id' => $adminId]);
 
         // 2. Membuat User Regular

@@ -20,7 +20,7 @@ class SettingsSeeder extends Seeder
             ['class' => 'Config\App', 'key' => 'siteTagline', 'value' => 'Tagline singkat situs'],
             ['class' => 'Config\App', 'key' => 'siteTelp', 'value' => '0231123456'],
             ['class' => 'Config\App', 'key' => 'siteWa', 'value' => '0812345678'],
-            ['class' => 'Config\App', 'key' => 'siteTelegram', 'value' => '0812345678'],
+            ['class' => 'Config\App', 'key' => 'siteTelegram', 'value' => ''],
             ['class' => 'Config\App', 'key' => 'siteEmail', 'value' => 'nama@domain.com'],
             ['class' => 'Config\App', 'key' => 'siteAlamat', 'value' => 'Kota Cirebon, Jawa Barat'],
 

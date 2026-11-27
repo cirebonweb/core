@@ -44,6 +44,29 @@ php spark cirebonweb:publish --writable
 > `--all` menjalankan semua grup dan menyalin seluruh isi masing-masing sumber,
 > termasuk aset `plugin/`, `vendor/`, dan `upload/` dari `src/Publish/Public`.
 
+### Instalasi APP baru
+
+Untuk instalasi APP yang baru dibuat dan belum memiliki kustomisasi, jalankan
+publisher sekali dengan kedua opsi berikut:
+
+```bash
+php spark cirebonweb:publish --all --force
+```
+
+`--all` memilih semua grup publish, sedangkan `--force` memastikan file
+bootstrap bawaan CI4—terutama `app/Config/Routes.php`,
+`app/Controllers/Home.php`, dan `app/Controllers/BaseController.php`—diganti
+dengan versi CORE. Tanpa `--force`, publisher dapat melewati file yang
+dianggap sudah berbeda dari sumber; perintah tetap selesai, tetapi file penting
+mungkin tidak terpasang dan APP dapat mengalami error saat dijalankan.
+
+Gunakan `--force` hanya pada instalasi baru atau ketika memang ingin
+menimpa perubahan APP. Untuk APP yang sudah berjalan dan memiliki kustomisasi,
+jangan jalankan `--all --force` tanpa meninjau dampaknya; publish grup yang
+diperlukan tanpa `--force`, lalu gabungkan perubahan yang dilewati secara
+manual. Tidak perlu menjalankan `--all`, `--force`, dan `--all --force`
+sebagai tiga perintah terpisah.
+
 ## 🚀 Publish config
 ```bash
 php spark cirebonweb:publish --config

@@ -33,11 +33,12 @@
     </div>
 
     <div class="col-md-4 mb-4">
-        <label class="mb-2">Telegram ID</label>
+        <label class="mb-2">Telegram Chat ID</label>
         <div class="input-group">
             <div class="input-group-prepend"><span class="input-group-text"><i class="bi bi-telegram"></i></span></div>
-            <input type="text" id="siteTelegram" name="siteTelegram" class="form-control" value="<?= old('siteTelegram', setting('App.siteTelegram')) ?>" required>
+            <input type="text" id="siteTelegram" name="siteTelegram" class="form-control" value="<?= old('siteTelegram', setting('App.siteTelegram')) ?>" placeholder="ID angka atau @username channel">
         </div>
+        <small class="form-text text-muted">Chat ID untuk notifikasi bot; gunakan ID angka untuk chat/grup atau @username untuk channel publik.</small>
     </div>
 
     <div class="col-md-6 mb-4">

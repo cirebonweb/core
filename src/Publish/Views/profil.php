@@ -1,8 +1,7 @@
 <?= $this->extend('layout/template') ?>
 <?php $isPemilikProfil = auth()->id() !== null && (int) auth()->id() === (int) $userId; ?>
 
-<?= $this->section("css") ?>
-<?= $this->include('plugin/tabel_css') ?>
+<?= $this->section('css') ?>
 <?= $this->endSection() ?>
 
 <?= $this->section('konten') ?>
@@ -203,7 +202,7 @@
 </section>
 <?= $this->endSection() ?>
 
-<?= $this->section("js") ?>
+<?= $this->section('js') ?>
 
 <script>
     let isPemilikProfil;

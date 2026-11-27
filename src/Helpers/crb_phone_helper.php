@@ -71,14 +71,19 @@ if (!function_exists('link_telp')) {
 
 if (!function_exists('link_telegram')) {
     /**
-     * Menghasilkan tautan Telegram (bisa buka di web/app).
+     * Menghasilkan tautan publik Telegram untuk username atau channel.
      *
-     * @param string|null $username Username Telegram tanpa @.
-     * @return string|null URL Telegram valid, atau null jika kosong.
+     * @param string|null $username Username Telegram, opsional dengan awalan @.
+     * @return string|null URL publik Telegram; chat ID numerik tidak dapat dijadikan tautan t.me.
      */
     function link_telegram(?string $username): ?string
     {
         if (empty($username)) {
+            return null;
+        }
+
+        $username = trim($username);
+        if (preg_match('/^-?\d+$/', $username) === 1) {
             return null;
         }
 

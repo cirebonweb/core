@@ -17,6 +17,29 @@ Dokumen ini melengkapi [daftar-kerja.md](daftar-kerja.md) sebagai riwayat sesi.
 - Cantumkan: tujuan/ringkasan, label pekerjaan, file yang diubah, hasil verifikasi, dan catatan/temuan yang belum selesai.
 - Sertakan timestamp dengan zona waktu jika diketahui.
 
+## 2026-11-28 02:59:39 +07:00 — Copilot SDK (VS Code)
+
+- **Ringkasan:** Menyiapkan revisi 1.0.5 untuk pengujian Composer di APP lain dan meninjau ulang perbandingan kepemilikan profil.
+- **Pekerjaan:**
+  - `[fix]` [profil.php](../Publish/Views/profil.php): mempertahankan perbandingan ID pemilik yang aman terhadap perbedaan tipe integer/string, sesuai konfirmasi pengguna.
+  - `[doc]` [README.md](../../README.md): memperbarui versi target menjadi 1.0.5.
+  - `[doc]` [ARSITEKTUR.md](../../ARSITEKTUR.md): menyelaraskan keterangan group user contoh dengan `UserSeeder` (`superadmin` dan `user`).
+  - `[doc]` Membuat catatan tentang perubahan Setting Umum, Telegram Chat ID, dan instalasi APP baru di entri sesi sebelumnya; panduan instalasi menganjurkan `php spark cirebonweb:publish --all --force` untuk APP baru.
+- **Verifikasi:** `composer validate --no-check-publish`, `node --check src/Views/setting/umum.js`, `php -l` pada file PHP yang berubah, dan `git diff --check` lulus.
+- **Catatan:** Belum dilakukan pengujian instalasi Composer end-to-end di APP terpisah. Uji email/SMTP/reset password/magic link masih ditunda ke lingkungan hosting. GitHub Release 1.0.4 telah diterbitkan secara retrospektif.
+
+## 2026-11-28 02:37:06 +07:00 — Copilot SDK (VS Code)
+
+- **Ringkasan:** Memperjelas penyimpanan pengaturan situs dan dokumentasi uji APP; pengujian pengiriman email ditunda sampai lingkungan online/hosting.
+- **Pekerjaan:**
+  - `[rev]` [umum.js](../Views/setting/umum.js): setelah `setting-umum/simpan-situs` sukses, tampilkan pesan sukses lalu reload halaman agar perubahan seperti `siteNama` langsung terlihat.
+  - `[doc]` Menambahkan PHPDoc berlabel tab Sistem, Situs, Logo, dan SMTP pada fungsi/callback di `umum.js` agar mudah ditemukan.
+  - `[rev]` Menyelaraskan `siteTelegram` menjadi Telegram Chat ID untuk notifikasi bot (ID numerik atau `@username` channel), opsional; validasi client/server diperbarui, seeder tidak lagi memakai contoh nomor telepon, dan `link_telegram()` tidak membuat tautan t.me untuk ID numerik.
+  - `[doc]` Memperbarui [daftar-kerja.md](daftar-kerja.md): mencatat uji manual halaman vendor yang dikonfirmasi pengguna dan menunda uji email/SMTP/reset password/magic link sampai APP online.
+- **File:** `src/Views/setting/umum.js`, `src/Views/setting/umum/situs.php`, `src/Models/SettingModel.php`, `src/Helpers/crb_phone_helper.php`, `src/Database/Seeds/SettingsSeeder.php`, `src/Dokumen/daftar-kerja.md`, `src/Dokumen/log-ai.md`
+- **Verifikasi:** `node --check` lulus untuk `umum.js`; `php -l` lulus untuk PHP yang diubah; pola chat ID diuji dengan contoh valid/tidak valid; `git diff --check` lulus. Pengujian SMTP/email tidak dilakukan sesuai permintaan.
+- **Catatan:** Chat ID numerik tidak dapat digunakan sebagai URL publik `t.me`; tautan Telegram hanya dibentuk untuk username/channel.
+
 ## 2026-11-28 01:10 +07:00 — Copilot SDK (VS Code)
 
 - **Ringkasan:** Meninjau persiapan CORE 1.0.4, memperbaiki otorisasi profil lintas pengguna, dan menyelaraskan dokumentasi publish dengan sumber yang ada.
